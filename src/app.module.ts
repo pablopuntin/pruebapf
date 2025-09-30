@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { EmpresaModule } from './empresa/empresa.module';
 import { EmpleadoModule } from './empleado/empleado.module';
+import { CategoriasModule } from './categorias/categorias.module';
+import { SuscripcionModule } from './suscripcion/suscripcion.module';
 
 @Module({
   imports: [
@@ -11,6 +13,8 @@ import { EmpleadoModule } from './empleado/empleado.module';
     }),
     EmpresaModule,
     EmpleadoModule,
+    CategoriasModule,
+    SuscripcionModule,
     // ...otros módulos
   ],
   controllers: [AppController]
