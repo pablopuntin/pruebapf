@@ -1,25 +1,3 @@
-// import { ApiProperty } from '@nestjs/swagger';
-
-// export class CreateEmpresaDto {
-//   @ApiProperty({ description: 'Nombre de la empresa', maxLength: 80 })
-//   nombre: string;
-
-//   @ApiProperty({ description: 'Razón social de la empresa', maxLength: 100 })
-//   razonSocial: string;
-
-//   @ApiProperty({ description: 'Dirección de la empresa', maxLength: 50 })
-//   direccion?: string;
-
-//   @ApiProperty({ description: 'Teléfono de contacto', maxLength: 30 })
-//   telefono?: string;
-
-//   @ApiProperty({ description: 'Correo electrónico', maxLength: 50 })
-//   email: string;
-
-//   @ApiProperty({ description: 'URL del logo', required: false })
-//   logo?: string;
-// }
-
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsString,
@@ -30,7 +8,10 @@ import {
 } from 'class-validator';
 
 export class CreateEmpresaDto {
-  @ApiProperty({ example: 'Tech Solutions', description: 'Nombre de la empresa' })
+  @ApiProperty({
+    example: 'Tech Solutions',
+    description: 'Nombre de la empresa'
+  })
   @IsString()
   @IsNotEmpty()
   nombre: string;
