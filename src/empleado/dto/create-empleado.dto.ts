@@ -1,30 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsUUID,
   IsString,
   IsNotEmpty,
   IsInt,
   IsOptional,
   IsDateString,
-  IsNumber
+  IsNumber,
+  Matches
 } from 'class-validator';
 
 export class CreateEmpleadoDto {
-  @ApiProperty({ example: 'uuid-usuario', description: 'ID del usuario asociado' })
-  @IsUUID()
-  @IsNotEmpty()
-  usuario_id: string;
-
-  @ApiProperty({ example: 'uuid-empresa', description: 'ID de la empresa' })
-  @IsUUID()
-  @IsNotEmpty()
-  empresa_id: string;
-
-  @ApiProperty({ example: 'uuid-categoria', description: 'ID de la categoría interna' })
-  @IsUUID()
-  @IsNotEmpty()
-  categoria_id: string;
-
   @ApiProperty({ example: 'Juan', description: 'Nombre del empleado' })
   @IsString()
   @IsNotEmpty()
@@ -43,7 +28,10 @@ export class CreateEmpleadoDto {
   @IsInt()
   dni: number;
 
-  @ApiProperty({ example: '20-12345678-9', description: 'CUIL único del empleado' })
+  @ApiProperty({
+    example: '20-12345678-9',
+    description: 'CUIL único del empleado'
+  })
   @IsString()
   @IsNotEmpty()
   cuil: string;
@@ -56,24 +44,32 @@ export class CreateEmpleadoDto {
   @ApiProperty({ example: 'Av. Siempre Viva 123', required: false })
   @IsOptional()
   @IsString()
-  domicilio_laboral?: string;
+  domicilio?: string;
 
-  @ApiProperty({ example: '1995-05-12', description: 'Fecha de cumpleaños', required: false })
+  @ApiProperty({
+    example: '1995-05-12',
+    description: 'Fecha de nacimiento',
+    required: true
+  })
   @IsOptional()
   @IsDateString()
-  cumpleaños?: Date;
-
-  @ApiProperty({ example: '1995-05-12', description: 'Fecha de nacimiento', required: false })
-  @IsOptional()
-  @IsDateString()
-  fecha_nacimiento?: Date;
+  fecha_nacimiento: Date;
 
   @ApiProperty({ example: 'https://cdn.com/empleado.png', required: false })
   @IsOptional()
   @IsString()
   imagen?: string;
 
-  @ApiProperty({ example: 75000.50, description: 'Sueldo del empleado', required: false })
+  @ApiProperty({
+    example: 75000.5,
+    description: 'Sueldo del empleado',
+    required: false,
+    type: 'number',
+    format: 'float'
+  })
+  @Matches(/^\d+(\.\d{1,2})?$/, {
+    message: 'El sueldo debe tener como máximo dos decimales'
+  })
   @IsOptional()
   @IsNumber()
   sueldo?: number;
