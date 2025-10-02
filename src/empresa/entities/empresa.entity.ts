@@ -19,9 +19,6 @@ export class Company {
   @Column()
   legal_name: string;
 
-  @Column({ unique: true })
-  razon_social: string;
-
   @Column({ nullable: true })
   address: string;
 
