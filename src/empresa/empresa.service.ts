@@ -1,26 +1,47 @@
-import { Injectable } from '@nestjs/common';
+// src/empresa/empresa.service.ts
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Company } from './entities/empresa.entity';
 import { CreateCompanyDto } from './dto/create-empresa.dto';
 import { UpdateCompanyDto } from './dto/update-empresa.dto';
 
 @Injectable()
 export class EmpresaService {
-  create(createCompanyDto: CreateCompanyDto) {
-    return 'This action adds a new empresa';
+  constructor(
+    @InjectRepository(Company)
+    private readonly companyRepository: Repository<Company>
+  ) {}
+
+  async create(createCompanyDto: CreateCompanyDto): Promise<Company> {
+    const company = this.companyRepository.create({
+      ...createCompanyDto,
+      phone_number: createCompanyDto.phone_number?.toString(), // conversión explícita
+      logo: createCompanyDto.logo_url // mapeo de nombre
+    });
+    return this.companyRepository.save(company);
   }
 
-  findAll() {
-    return `This action returns all empresa`;
+  async findAll(): Promise<Company[]> {
+    return this.companyRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} empresa`;
+  async findOne(id: string): Promise<Company> {
+    const company = await this.companyRepository.findOne({ where: { id } });
+    if (!company) throw new NotFoundException(`Empresa con ID ${id} no encontrada`);
+    return company;
   }
 
-  update(id: number, updateCompanyDto: UpdateCompanyDto) {
-    return `This action updates a #${id} empresa`;
+  async update(id: string, updateCompanyDto: UpdateCompanyDto): Promise<Company> {
+    await this.companyRepository.update(id, {
+      ...updateCompanyDto,
+      phone_number: updateCompanyDto.phone_number?.toString(),
+      logo: updateCompanyDto.logo_url,
+    });
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} empresa`;
+  async remove(id: string): Promise<void> {
+    await this.companyRepository.softDelete(id);
   }
 }
