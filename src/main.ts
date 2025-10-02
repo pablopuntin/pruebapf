@@ -3,9 +3,14 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
+import { config as auth0Config } from './config/auth0.config';
+import { auth } from 'express-openid-connect';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  //Configuracion de Auth0
+  app.use(auth(auth0Config));
 
   // Activar validación global
   app.useGlobalPipes(
