@@ -6,35 +6,26 @@ import {
   DeleteDateColumn,
   JoinColumn
 } from 'typeorm';
-// import { Usuario } from '../../usuario/entities/usuario.entity';
-import { Empresa } from '../../empresa/entities/empresa.entity';
-// import { Categoria } from '../../categoria/entities/categoria.entity';
 
-@Entity('empleado')
-export class Empleado {
+import { Company } from '../../empresa/entities/empresa.entity';
+
+@Entity('employee')
+export class Employee {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // @ManyToOne(() => Usuario, (usuario) => usuario.empleados, { eager: true })
-  // @JoinColumn({ name: 'usuario_id' })
-  // usuario: Usuario;
-
-  @ManyToOne(() => Empresa, (empresa) => empresa.empleados, { eager: true })
-  @JoinColumn({ name: 'empresa_id' })
-  empresa: Empresa;
-
-  // @ManyToOne(() => Categoria, (categoria) => categoria.empleados, { eager: true })
-  // @JoinColumn({ name: 'categoria_id' })
-  // categoria: Categoria;
+@ManyToOne(() => Company, (company) => company.employees, { eager: true })
+@JoinColumn({ name: 'company_id' })
+company: Company;
 
   @Column()
-  nombre: string;
+  first_name: string;
 
   @Column()
-  apellido: string;
+  last_name: string;
 
   @Column({ type: 'int' })
-  edad: number;
+  age: number;
 
   @Column({ unique: true, type: 'int' })
   dni: number;
@@ -43,22 +34,25 @@ export class Empleado {
   cuil: string;
 
   @Column({ nullable: true })
-  telefono: string;
+  phone_number: string;
 
   @Column({ name: 'domicilio_laboral', nullable: true })
-  domicilioLaboral: string;
-
-  @Column({ type: 'date', nullable: true })
-  cumpleaños: Date;
+  address: string;
 
   @Column({ name: 'fecha_nacimiento', type: 'date', nullable: true })
-  fechaNacimiento: Date;
+  birthdate: Date;
 
   @Column({ nullable: true })
-  imagen: string;
+  imgUrl: string;
 
   @Column({ type: 'float', nullable: true })
-  sueldo: number;
+  salary: number;
+
+  @Column()
+  email: string;
+
+  @Column({ name: 'created_at' })
+  creted_at: Date;
 
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date;

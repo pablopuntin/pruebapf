@@ -9,20 +9,20 @@ import {
   Matches
 } from 'class-validator';
 
-export class CreateEmpleadoDto {
+export class CreateEmployeeDto {
   @ApiProperty({ example: 'Juan', description: 'Nombre del empleado' })
   @IsString()
   @IsNotEmpty()
-  nombre: string;
+  first_name: string;
 
   @ApiProperty({ example: 'Pérez', description: 'Apellido del empleado' })
   @IsString()
   @IsNotEmpty()
-  apellido: string;
+  last_name: string;
 
   @ApiProperty({ example: 30, description: 'Edad del empleado' })
   @IsInt()
-  edad: number;
+  edad?: number;
 
   @ApiProperty({ example: 12345678, description: 'DNI único del empleado' })
   @IsInt()
@@ -34,17 +34,17 @@ export class CreateEmpleadoDto {
   })
   @IsString()
   @IsNotEmpty()
-  cuil: string;
+  cuil?: string;
 
   @ApiProperty({ example: '+54 9 11 1234-5678', required: false })
   @IsOptional()
   @IsString()
-  telefono?: string;
+  phone_number?: string;
 
   @ApiProperty({ example: 'Av. Siempre Viva 123', required: false })
   @IsOptional()
   @IsString()
-  domicilio?: string;
+  address?: string;
 
   @ApiProperty({
     example: '1995-05-12',
@@ -53,12 +53,12 @@ export class CreateEmpleadoDto {
   })
   @IsOptional()
   @IsDateString()
-  fecha_nacimiento: Date;
+  birthdate: Date;
 
   @ApiProperty({ example: 'https://cdn.com/empleado.png', required: false })
   @IsOptional()
   @IsString()
-  imagen?: string;
+  img_url?: string;
 
   @ApiProperty({
     example: 75000.5,
@@ -72,5 +72,5 @@ export class CreateEmpleadoDto {
   })
   @IsOptional()
   @IsNumber()
-  sueldo?: number;
+  salary?: number;
 }
