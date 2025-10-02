@@ -1,14 +1,14 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { EmpresaService } from './empresa.service';
-import { CreateEmpresaDto } from './dto/create-empresa.dto';
-import { UpdateEmpresaDto } from './dto/update-empresa.dto';
+import { CreateCompanyDto } from './dto/create-empresa.dto';
+import { UpdateCompanyDto } from './dto/update-empresa.dto';
 
 @Controller('empresa')
 export class EmpresaController {
   constructor(private readonly empresaService: EmpresaService) {}
 
   @Post()
-  create(@Body() createEmpresaDto: CreateEmpresaDto) {
+  create(@Body() createEmpresaDto: CreateCompanyDto) {
     return this.empresaService.create(createEmpresaDto);
   }
 
@@ -23,8 +23,8 @@ export class EmpresaController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEmpresaDto: UpdateEmpresaDto) {
-    return this.empresaService.update(+id, updateEmpresaDto);
+  update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto) {
+    return this.empresaService.update(+id, updateCompanyDto);
   }
 
   @Delete(':id')
