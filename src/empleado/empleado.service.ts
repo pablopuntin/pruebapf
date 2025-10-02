@@ -1,5 +1,5 @@
 // src/empleado/empleado.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Employee } from './entities/empleado.entity';
@@ -14,9 +14,17 @@ export class EmpleadoService {
   ) {}
 
   async create(createEmployeeDto: CreateEmployeeDto): Promise<Employee> {
-    const employee = this.employeeRepository.create(createEmployeeDto);
-    return this.employeeRepository.save(employee);
+  try {
+  const employee = this.employeeRepository.create(createEmployeeDto);
+    return await this.employeeRepository.save(employee);
+  } catch (error) {
+    // Puedes loguear el error si lo necesitas
+    console.error('Error al crear empleado:', error);
+
+    // Lanzar una excepción HTTP con un mensaje personalizado
+  throw new InternalServerErrorException('No se pudo crear el empleado');
   }
+}
 
   async findAll(): Promise<Employee[]> {
     return this.employeeRepository.find();

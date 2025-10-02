@@ -30,9 +30,6 @@ company: Company;
   @Column({ unique: true, type: 'int' })
   dni: number;
 
-  @Column({ unique: true })
-  cuil: string;
-
   @Column({ nullable: true })
   phone_number: string;
 
