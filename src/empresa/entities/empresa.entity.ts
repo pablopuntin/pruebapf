@@ -38,11 +38,12 @@ export class Company {
   deletedAt?: Date;
 
   @Column({
-    name: 'fecha_update'
+    name: 'fecha_update',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP'
   })
   update_at: Date;
 
-  // Relaciones
-@OneToMany(() => Employee, (employee) => employee.company)
-employees: Employee[];
+  @OneToMany(() => Employee, (employee) => employee.company)
+  employees: Employee[];
 }

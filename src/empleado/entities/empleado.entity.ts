@@ -4,9 +4,9 @@ import {
   Column,
   ManyToOne,
   DeleteDateColumn,
-  JoinColumn
+  JoinColumn,
+  CreateDateColumn
 } from 'typeorm';
-
 import { Company } from '../../empresa/entities/empresa.entity';
 
 @Entity('employee')
@@ -14,9 +14,9 @@ export class Employee {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-@ManyToOne(() => Company, (company) => company.employees, { eager: true })
-@JoinColumn({ name: 'company_id' })
-company: Company;
+  @ManyToOne(() => Company, (company) => company.employees, { eager: true })
+  @JoinColumn({ name: 'company_id' })
+  company: Company;
 
   @Column()
   first_name: string;
@@ -24,11 +24,14 @@ company: Company;
   @Column()
   last_name: string;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', nullable: true })
   age: number;
 
   @Column({ unique: true, type: 'int' })
   dni: number;
+
+  @Column()
+  cuil: string;
 
   @Column({ nullable: true })
   phone_number: string;
@@ -48,8 +51,8 @@ company: Company;
   @Column()
   email: string;
 
-  @Column({ name: 'created_at' })
-  creted_at: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  created_at: Date;
 
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date;

@@ -14,10 +14,11 @@ export class EmpresaService {
   ) {}
 
   async create(createCompanyDto: CreateCompanyDto): Promise<Company> {
+    
     const company = this.companyRepository.create({
       ...createCompanyDto,
       phone_number: createCompanyDto.phone_number?.toString(), // conversión explícita
-      logo: createCompanyDto.logo_url // mapeo de nombre
+      logo: createCompanyDto.logo // mapeo de nombre
     });
     return this.companyRepository.save(company);
   }
@@ -36,7 +37,7 @@ export class EmpresaService {
     await this.companyRepository.update(id, {
       ...updateCompanyDto,
       phone_number: updateCompanyDto.phone_number?.toString(),
-      logo: updateCompanyDto.logo_url,
+      logo: updateCompanyDto.logo
     });
     return this.findOne(id);
   }
