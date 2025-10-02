@@ -10,6 +10,8 @@ import { EmpleadoModule } from './empleado/empleado.module';
 import { SuscripcionModule } from './suscripcion/suscripcion.module';
 import { DepartamentoModule } from './departamento/departamento.module';
 import { PlanModule } from './plan/plan.module';
+import { RolModule } from './rol/rol.module';
+import { PositionModule } from './position/position.module';
 
 @Module({
   imports: [
@@ -25,7 +27,9 @@ import { PlanModule } from './plan/plan.module';
     EmpleadoModule,
     DepartamentoModule,
     SuscripcionModule,
-    PlanModule
+    PlanModule,
+    RolModule,
+    PositionModule
     // ...otros módulos
   ],
   controllers: [AppController]
