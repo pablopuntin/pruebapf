@@ -19,16 +19,16 @@ export class EmpleadoController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.empleadoService.findOne(+id);
+    return this.empleadoService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
-    return this.empleadoService.update(+id, updateEmployeeDto);
+    return this.empleadoService.update(id, updateEmployeeDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.empleadoService.remove(+id);
+    return this.empleadoService.remove(id);
   }
 }
