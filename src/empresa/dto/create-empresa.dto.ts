@@ -7,14 +7,14 @@ import {
   IsNumber
 } from 'class-validator';
 
-export class CreateEmpresaDto {
+export class CreateCompanyDto {
   @ApiProperty({
     example: 'Tech Solutions',
     description: 'Nombre de la empresa'
   })
   @IsString()
   @IsNotEmpty()
-  nombre: string;
+  trade_name: string;
 
   @ApiProperty({
     example: 'Tech Solutions S.A.',
@@ -22,7 +22,7 @@ export class CreateEmpresaDto {
   })
   @IsString()
   @IsNotEmpty()
-  razon_social: string;
+  legal_name: string;
 
   @ApiProperty({
     example: 'Av. Siempre Viva 123',
@@ -31,7 +31,7 @@ export class CreateEmpresaDto {
   })
   @IsOptional()
   @IsString()
-  direccion?: string;
+  address?: string;
 
   @ApiProperty({
     example: 555123456,
@@ -40,7 +40,7 @@ export class CreateEmpresaDto {
   })
   @IsOptional()
   @IsNumber()
-  telefono?: number;
+  phone_number?: number;
 
   @ApiProperty({
     example: 'contacto@techsolutions.com',
@@ -58,5 +58,5 @@ export class CreateEmpresaDto {
   })
   @IsOptional()
   @IsString()
-  logo?: string;
+  logo_url?: string;
 }

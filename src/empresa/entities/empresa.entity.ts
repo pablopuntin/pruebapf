@@ -6,24 +6,27 @@ import {
   CreateDateColumn,
   DeleteDateColumn
 } from 'typeorm';
-import { Empleado } from 'src/empleado/entities/empleado.entity';
+import { Employee } from 'src/empleado/entities/empleado.entity';
 
-@Entity('empresa')
-export class Empresa {
+@Entity('company')
+export class Company {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
-  nombre: string;
+  trade_name: string;
+
+  @Column()
+  legal_name: string;
 
   @Column({ unique: true })
   razon_social: string;
 
   @Column({ nullable: true })
-  direccion: string;
+  address: string;
 
-  @Column({ type: 'bigint', nullable: true })
-  telefono: number;
+  @Column({ type: 'varchar', nullable: true })
+  phone_number: string;
 
   @Column({ nullable: true })
   email: string;
@@ -32,12 +35,17 @@ export class Empresa {
   logo: string;
 
   @CreateDateColumn({ name: 'fecha_creacion' })
-  fechaCreacion: Date;
+  created_at: Date;
 
-  @DeleteDateColumn({ name: 'deleted_at' })
+  @DeleteDateColumn({ name: 'fecha_deteted' })
   deletedAt?: Date;
 
+  @Column({
+    name: 'fecha_update'
+  })
+  update_at: Date;
+
   // Relaciones
-  @OneToMany(() => Empleado, (empleado) => empleado.empresa)
-  empleados: Empleado[];
+@OneToMany(() => Employee, (employee) => employee.company)
+employees: Employee[];
 }
