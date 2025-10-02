@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { EmpresaModule } from './empresa/empresa.module';
@@ -12,24 +12,26 @@ import { DepartamentoModule } from './departamento/departamento.module';
     ConfigModule.forRoot({
       isGlobal: true
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT || '5432', 10),
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      ssl: {
-        rejectUnauthorized: false
-      },
-      autoLoadEntities: true,
-      synchronize: true
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        type: 'postgres',
+        url: config.get<string>('DATABASE_URL'),
+        host: config.get<string>('DB_HOST'),
+        port: config.get<number>('DB_PORT') || 5432,
+        username: config.get<string>('DB_USERNAME'),
+        password: config.get<string>('DB_PASSWORD'),
+        database: config.get<string>('DB_NAME'),
+        ssl: config.get('DATABASE_URL') ? { rejectUnauthorized: false } : false,
+        autoLoadEntities: true,
+        synchronize: false, // ⚠️ no usar true en producción
+      })
     }),
     EmpresaModule,
     EmpleadoModule,
     DepartamentoModule,
     SuscripcionModule
-    // ...otros módulos
   ],
   controllers: [AppController]
 })
