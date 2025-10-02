@@ -18,6 +18,14 @@ export class Employee {
   @JoinColumn({ name: 'company_id' })
   company: Company;
 
+  @ManyToOne('Department', 'employees')
+  @JoinColumn({ name: 'department_id' })
+  department: any;
+
+  @ManyToOne('Position', 'employees')
+  @JoinColumn({ name: 'position_id' })
+  position: any;
+
   @Column()
   first_name: string;
 
