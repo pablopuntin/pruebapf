@@ -4,8 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { EmpresaModule } from './empresa/empresa.module';
 import { EmpleadoModule } from './empleado/empleado.module';
-import { CategoriasModule } from './categorias/categorias.module';
 import { SuscripcionModule } from './suscripcion/suscripcion.module';
+import { DepartamentoModule } from './departamento/departamento.module';
 
 @Module({
   imports: [
@@ -27,7 +27,7 @@ import { SuscripcionModule } from './suscripcion/suscripcion.module';
     }),
     EmpresaModule,
     EmpleadoModule,
-    CategoriasModule,
+    DepartamentoModule,
     SuscripcionModule
     // ...otros módulos
   ],

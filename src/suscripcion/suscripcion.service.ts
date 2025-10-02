@@ -1,26 +1,69 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateSuscripcionDto } from './dto/create-suscripcion.dto';
 import { UpdateSuscripcionDto } from './dto/update-suscripcion.dto';
+import { Suscripcion } from './entities/suscripcion.entity';
 
 @Injectable()
 export class SuscripcionService {
-  create(createSuscripcionDto: CreateSuscripcionDto) {
-    return 'This action adds a new suscripcion';
+  constructor(
+    @InjectRepository(Suscripcion)
+    private readonly suscripcionRepository: Repository<Suscripcion>
+  ) {}
+
+  async create(
+    createSuscripcionDto: CreateSuscripcionDto
+  ): Promise<Suscripcion> {
+    // Generar token único para la suscripción
+    const token = this.generateUniqueToken();
+
+    const suscripcion = this.suscripcionRepository.create({
+      ...createSuscripcionDto,
+      token
+    });
+
+    return await this.suscripcionRepository.save(suscripcion);
   }
 
-  findAll() {
-    return `This action returns all suscripcion`;
+  async findAll(): Promise<Suscripcion[]> {
+    return await this.suscripcionRepository.find({
+      relations: ['company', 'plan'],
+      order: { start_date: 'DESC' }
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} suscripcion`;
+  async findOne(id: string): Promise<Suscripcion> {
+    const suscripcion = await this.suscripcionRepository.findOne({
+      where: { id },
+      relations: ['company', 'plan']
+    });
+
+    if (!suscripcion) {
+      throw new Error('Suscripción no encontrada');
+    }
+
+    return suscripcion;
   }
 
-  update(id: number, updateSuscripcionDto: UpdateSuscripcionDto) {
-    return `This action updates a #${id} suscripcion`;
+  async update(
+    id: string,
+    updateSuscripcionDto: UpdateSuscripcionDto
+  ): Promise<Suscripcion> {
+    await this.suscripcionRepository.update(id, updateSuscripcionDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} suscripcion`;
+  async remove(id: string): Promise<void> {
+    await this.suscripcionRepository.delete(id);
+  }
+
+  private generateUniqueToken(): string {
+    return (
+      'sub_' +
+      Math.random().toString(36).substr(2, 9) +
+      '_' +
+      Date.now().toString(36)
+    );
   }
 }
