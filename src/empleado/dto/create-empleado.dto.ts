@@ -24,7 +24,7 @@ export class CreateEmployeeDto {
   @IsInt()
   edad?: number;
 
-  @ApiProperty({ example: 12345678, description: 'DNI único del empleado' })
+  @ApiProperty({ example: 12345679, description: 'DNI único del empleado' })
   @IsInt()
   dni: number;
 
