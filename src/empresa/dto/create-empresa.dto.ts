@@ -3,8 +3,7 @@ import {
   IsString,
   IsNotEmpty,
   IsOptional,
-  IsEmail,
-  IsNumber
+  IsEmail
 } from 'class-validator';
 
 export class CreateCompanyDto {
@@ -34,13 +33,13 @@ export class CreateCompanyDto {
   address?: string;
 
   @ApiProperty({
-    example: 555123456,
+    example: '555123456',
     description: 'Número de teléfono de la empresa',
     required: false
   })
   @IsOptional()
-  @IsNumber()
-  phone_number?: number;
+  @IsString()
+  phone_number?: string;
 
   @ApiProperty({
     example: 'contacto@techsolutions.com',
@@ -58,5 +57,5 @@ export class CreateCompanyDto {
   })
   @IsOptional()
   @IsString()
-  logo_url?: string;
+  logo?: string;
 }
