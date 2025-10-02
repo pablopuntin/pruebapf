@@ -15,6 +15,14 @@ async function bootstrap() {
       transform: true // transforma tipos automáticamente (ej: string -> number)
     })
   );
+  app.enableCors({
+    origin: [
+      'https://tu-front.vercel.app', // tu dominio de Vercel
+      'http://localhost:3000' // para pruebas locales
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
 
   const configService = app.get(ConfigService);
 
