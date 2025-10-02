@@ -19,16 +19,16 @@ export class SuscripcionController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.suscripcionService.findOne(+id);
+    return this.suscripcionService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateSuscripcionDto: UpdateSuscripcionDto) {
-    return this.suscripcionService.update(+id, updateSuscripcionDto);
+    return this.suscripcionService.update(id, updateSuscripcionDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.suscripcionService.remove(+id);
+    return this.suscripcionService.remove(id);
   }
 }
