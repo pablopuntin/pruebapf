@@ -6,7 +6,7 @@ import {
   JoinColumn
 } from 'typeorm';
 import { Company } from '../../empresa/entities/empresa.entity';
-import { Plan } from './plan.entity';
+
 
 @Entity('subscription')
 export class Suscripcion {
@@ -32,7 +32,7 @@ export class Suscripcion {
   @JoinColumn({ name: 'company_id' })
   company: Company;
 
-  @ManyToOne(() => Plan, (plan) => plan.suscripciones)
-  @JoinColumn({ name: 'plan_id' })
-  plan: Plan;
+  // @ManyToOne(() => Plan, (plan) => plan.suscripciones)
+  // @JoinColumn({ name: 'plan_id' })
+  // plan: Plan;
 }
