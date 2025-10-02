@@ -12,5 +12,5 @@ export const getTypeOrmConfig = (config: ConfigService): TypeOrmModuleOptions =>
   database: config.get<string>('DB_NAME'),
   ssl: config.get('DATABASE_URL') ? { rejectUnauthorized: false } : false,
   autoLoadEntities: true,
-  synchronize: false // ⚠️ Nunca usar true en producción
+  synchronize: true // ⚠️ Nunca usar true en producción
 });
