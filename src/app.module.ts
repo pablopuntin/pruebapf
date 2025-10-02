@@ -4,6 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { EmpresaModule } from './empresa/empresa.module';
 import { EmpleadoModule } from './empleado/empleado.module';
+import { SuscripcionModule } from './suscripcion/suscripcion.module';
+import { DepartamentoModule } from './departamento/departamento.module';
 
 @Module({
   imports: [
@@ -24,7 +26,10 @@ import { EmpleadoModule } from './empleado/empleado.module';
       synchronize: true
     }),
     EmpresaModule,
-    EmpleadoModule
+    EmpleadoModule,
+    DepartamentoModule,
+    SuscripcionModule
+    // ...otros módulos
   ],
   controllers: [AppController]
 })
