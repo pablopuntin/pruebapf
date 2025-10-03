@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Get, Controller, Post, Delete, Param, Body } from '@nestjs/common';
+import { Patch } from '@nestjs/common';
 import { EmpresaService } from './empresa.service';
 import { CreateCompanyDto } from './dto/create-empresa.dto';
 import { UpdateCompanyDto } from './dto/update-empresa.dto';
+import { ParseUUIDPipe } from '@nestjs/common';
 
 @Controller('empresa')
 export class EmpresaController {
@@ -18,7 +20,8 @@ export class EmpresaController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
+    // Si id no es UUID válido, Nest lanzará automáticamente un BadRequestException
     return this.empresaService.findOne(id);
   }
 
