@@ -1,9 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
+import { AppService } from './app.service';
 
 @Controller() // vacío significa la ruta raíz "/"
 export class AppController {
+  constructor(private readonly appService: AppService) {}
   @Get()
   getRoot(): string {
-    return 'Bienvenidos a nuestra API';
+    return this.appService.getHello();
   }
 }

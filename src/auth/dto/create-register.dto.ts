@@ -66,7 +66,7 @@ export class CreateRegisterDto {
   @IsString()
   @IsUrl()
   @MaxLength(255)
-  logo_url: string;
+  logo_url?: string | null;
 
   @ApiProperty({
     description: 'El número telefónico es texto.',

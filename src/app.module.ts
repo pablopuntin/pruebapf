@@ -15,6 +15,13 @@ import { PositionModule } from './position/position.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 
+//--------------SEEDER----------------//
+import { AppService } from './app.service';
+import { PlanService } from './plan/plan.service';
+import { RolService } from './rol/rol.service';
+import { Plan } from './plan/entities/plan.entity';
+import { Rol } from './rol/entities/rol.entity';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -33,9 +40,11 @@ import { UserModule } from './user/user.module';
     RolModule,
     PositionModule,
     AuthModule,
-    UserModule
+    UserModule,
+    TypeOrmModule.forFeature([Plan, Rol])
     // ...otros módulos
   ],
-  controllers: [AppController]
+  controllers: [AppController],
+  providers: [AppService, PlanService, RolService]
 })
 export class AppModule {}
