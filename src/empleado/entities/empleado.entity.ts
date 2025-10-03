@@ -6,6 +6,7 @@ import {
   DeleteDateColumn,
   JoinColumn,
   CreateDateColumn,
+  UpdateDateColumn,
   OneToOne
 } from 'typeorm';
 import { Company } from '../../empresa/entities/empresa.entity';
@@ -67,9 +68,24 @@ export class Employee {
   @Column()
   email: string;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({
+    name: 'created_at',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP'
+  })
   created_at: Date;
 
-  @DeleteDateColumn({ name: 'deleted_at' })
-  deletedAt?: Date;
+  @UpdateDateColumn({
+    name: 'updated_at',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP'
+  })
+  updated_at: Date;
+
+  @DeleteDateColumn({
+    name: 'deleted_at',
+    type: 'timestamp',
+    nullable: true
+  })
+  deletedAt?: Date | null;
 }
