@@ -21,5 +21,8 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
-  }
+  },
+  "include": ["src/**/*"], // Esto asegura que todos los archivos en src sean incluidos.
+  "exclude": ["node_modules", "dist"], // Excluye carpetas de build y dependencias.
+  "typeRoots": ["./src/types", "./node_modules/@types"]
 }

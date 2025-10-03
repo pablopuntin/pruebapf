@@ -12,6 +12,7 @@ import { DepartamentoModule } from './departamento/departamento.module';
 import { PlanModule } from './plan/plan.module';
 import { RolModule } from './rol/rol.module';
 import { PositionModule } from './position/position.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { PositionModule } from './position/position.module';
     SuscripcionModule,
     PlanModule,
     RolModule,
-    PositionModule
+    PositionModule,
+    AuthModule
     // ...otros módulos
   ],
   controllers: [AppController]

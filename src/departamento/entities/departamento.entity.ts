@@ -7,6 +7,7 @@ import {
   DeleteDateColumn,
   OneToMany
 } from 'typeorm';
+import { Employee } from 'src/empleado/entities/empleado.entity';
 
 @Entity('departamento')
 export class Departamento {
@@ -28,6 +29,6 @@ export class Departamento {
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date;
 
-  @OneToMany('Employee', 'department')
-  employees: any[];
+ @OneToMany(() => Employee, (employee) => employee.department)
+employees: Employee[];
 }
