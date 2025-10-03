@@ -12,6 +12,7 @@ export class SuscripcionService {
     private readonly suscripcionRepository: Repository<Suscripcion>
   ) {}
 
+  /*
   async create(
     createSuscripcionDto: CreateSuscripcionDto
   ): Promise<Suscripcion> {
@@ -25,6 +26,7 @@ export class SuscripcionService {
 
     return await this.suscripcionRepository.save(suscripcion);
   }
+    */
 
   async findAll(): Promise<Suscripcion[]> {
     return await this.suscripcionRepository.find({
