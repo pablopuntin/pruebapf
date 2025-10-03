@@ -7,8 +7,10 @@ import {
   DeleteDateColumn
 } from 'typeorm';
 import { Employee } from 'src/empleado/entities/empleado.entity';
+import { User } from 'src/user/entities/user.entity';
+import { Suscripcion } from 'src/suscripcion/entities/suscripcion.entity';
 
-@Entity('company')
+@Entity('companies')
 export class Company {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -46,4 +48,10 @@ export class Company {
 
   @OneToMany(() => Employee, (employee) => employee.company)
   employees: Employee[];
+
+  @OneToMany(() => User, (user) => user.company)
+  users: User[];
+
+  @OneToMany(() => Suscripcion, (suscripcion) => suscripcion.company)
+  suscripciones: Suscripcion[];
 }

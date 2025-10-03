@@ -7,8 +7,9 @@ import {
   DeleteDateColumn,
   OneToMany
 } from 'typeorm';
+import { Suscripcion } from 'src/suscripcion/entities/suscripcion.entity';
 
-@Entity('plan')
+@Entity('plans')
 export class Plan {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -31,6 +32,6 @@ export class Plan {
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date;
 
-  @OneToMany('Suscripcion', 'plan')
-  suscripciones: any[];
+  @OneToMany(() => Suscripcion, (suscripcion) => suscripcion.plan)
+  suscripciones: Suscripcion[];
 }

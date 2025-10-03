@@ -5,6 +5,7 @@ import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
 import { PlanResponseDto } from './dto/plan-response.dto';
 import { Plan } from './entities/plan.entity';
+import { plans_data } from './data/plan.data';
 
 @Injectable()
 export class PlanService {
@@ -40,6 +41,13 @@ export class PlanService {
       createdAt: plan.createdAt,
       updatedAt: plan.updatedAt
     }));
+  }
+
+  async seeder() {
+    //Leer data y guardarla en la DB
+    await this.planRepository.upsert(plans_data, ['name']);
+
+    return { message: 'Plans added successfully.' };
   }
 
   async findOne(id: string): Promise<PlanResponseDto> {
