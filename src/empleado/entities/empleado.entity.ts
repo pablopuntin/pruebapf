@@ -8,6 +8,7 @@ import {
   CreateDateColumn
 } from 'typeorm';
 import { Company } from '../../empresa/entities/empresa.entity';
+import { Departamento } from 'src/departamento/entities/departamento.entity';
 
 @Entity('employee')
 export class Employee {
@@ -18,13 +19,13 @@ export class Employee {
   @JoinColumn({ name: 'company_id' })
   company: Company;
 
-  @ManyToOne('Department', 'employees')
+  @ManyToOne(() => Departamento, (department) => department.employees)
   @JoinColumn({ name: 'department_id' })
-  department: any;
+  department: Departamento;
 
-  @ManyToOne('Position', 'employees')
-  @JoinColumn({ name: 'position_id' })
-  position: any;
+  // @ManyToOne(() => Position, (position) => position.employees)
+  // @JoinColumn({ name: 'position_id' })
+  // position: Position;
 
   @Column()
   first_name: string;

@@ -22,7 +22,7 @@ async function bootstrap() {
   );
   app.enableCors({
     origin: [
-      'https://tu-front.vercel.app', // tu dominio de Vercel
+      'https://front-one-umber.vercel.app/', // tu dominio de Vercel
       'http://localhost:3000' // para pruebas locales
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
