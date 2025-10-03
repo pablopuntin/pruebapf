@@ -8,16 +8,10 @@ import {
 import { Company } from '../../empresa/entities/empresa.entity';
 import { Plan } from '../../plan/entities/plan.entity';
 
-@Entity('subscription')
+@Entity('subscriptions')
 export class Suscripcion {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @Column({ type: 'uuid' })
-  company_id: string;
-
-  @Column({ type: 'uuid' })
-  plan_id: string;
 
   @Column({ type: 'timestamp' })
   start_date: Date;
@@ -28,7 +22,7 @@ export class Suscripcion {
   @Column({ unique: true })
   token: string;
 
-  @ManyToOne(() => Company)
+  @ManyToOne(() => Company, (companie) => companie.suscripciones)
   @JoinColumn({ name: 'company_id' })
   company: Company;
 

@@ -13,6 +13,7 @@ import { PlanModule } from './plan/plan.module';
 import { RolModule } from './rol/rol.module';
 import { PositionModule } from './position/position.module';
 import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { AuthModule } from './auth/auth.module';
     PlanModule,
     RolModule,
     PositionModule,
-    AuthModule
+    AuthModule,
+    UserModule
     // ...otros módulos
   ],
   controllers: [AppController]

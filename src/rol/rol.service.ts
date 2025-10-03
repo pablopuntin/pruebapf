@@ -5,6 +5,7 @@ import { CreateRolDto } from './dto/create-rol.dto';
 import { UpdateRolDto } from './dto/update-rol.dto';
 import { RolResponseDto } from './dto/rol-response.dto';
 import { Rol } from './entities/rol.entity';
+import { rol_data } from './data/rol.data';
 
 @Injectable()
 export class RolService {
@@ -22,6 +23,13 @@ export class RolService {
       name: savedRol.name,
       description: savedRol.description
     };
+  }
+
+  async seeder() {
+    //Leer data y guardarla en la DB
+    await this.rolRepository.upsert(rol_data, ['name']);
+
+    return { message: 'Roles seeded successfully.' };
   }
 
   async findAll(): Promise<RolResponseDto[]> {

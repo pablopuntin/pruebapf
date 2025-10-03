@@ -25,6 +25,11 @@ export class PlanController {
     return this.planService.findAll();
   }
 
+  @Get('seeder')
+  seeder() {
+    return this.planService.seeder();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.planService.findOne(id);

@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Employee } from 'src/empleado/entities/empleado.entity';
 
-@Entity('departamento')
+@Entity('departamentos')
 export class Departamento {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -29,6 +29,6 @@ export class Departamento {
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date;
 
- @OneToMany(() => Employee, (employee) => employee.department)
-employees: Employee[];
+  @OneToMany(() => Employee, (employee) => employee.department)
+  employees: Employee[];
 }

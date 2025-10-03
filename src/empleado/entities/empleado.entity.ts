@@ -5,12 +5,15 @@ import {
   ManyToOne,
   DeleteDateColumn,
   JoinColumn,
-  CreateDateColumn
+  CreateDateColumn,
+  OneToOne
 } from 'typeorm';
 import { Company } from '../../empresa/entities/empresa.entity';
 import { Departamento } from 'src/departamento/entities/departamento.entity';
+import { User } from 'src/user/entities/user.entity';
+import { Position } from 'src/position/entities/position.entity';
 
-@Entity('employee')
+@Entity('employees')
 export class Employee {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -23,9 +26,13 @@ export class Employee {
   @JoinColumn({ name: 'department_id' })
   department: Departamento;
 
-  // @ManyToOne(() => Position, (position) => position.employees)
-  // @JoinColumn({ name: 'position_id' })
-  // position: Position;
+  @OneToOne(() => User, (user) => user.employee)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  @ManyToOne(() => Position, (position) => position.employees)
+  @JoinColumn({ name: 'position_id' })
+  position: Position;
 
   @Column()
   first_name: string;

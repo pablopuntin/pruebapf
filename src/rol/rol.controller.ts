@@ -25,6 +25,11 @@ export class RolController {
     return this.rolService.findAll();
   }
 
+  @Get('seeder')
+  seeder() {
+    return this.rolService.seeder();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.rolService.findOne(id);

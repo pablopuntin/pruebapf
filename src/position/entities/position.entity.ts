@@ -8,7 +8,9 @@ import {
   OneToMany
 } from 'typeorm';
 
-@Entity('position')
+import { Employee } from 'src/empleado/entities/empleado.entity';
+
+@Entity('positions')
 export class Position {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -28,6 +30,6 @@ export class Position {
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date;
 
-  @OneToMany('Employee', 'position')
-  employees: any[];
+  @OneToMany(() => Employee, (employee) => employee.position)
+  employees: Employee[];
 }
