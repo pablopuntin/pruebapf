@@ -4,7 +4,8 @@ import {
   Column,
   OneToMany,
   CreateDateColumn,
-  DeleteDateColumn
+  DeleteDateColumn,
+  UpdateDateColumn
 } from 'typeorm';
 import { Employee } from 'src/empleado/entities/empleado.entity';
 import { User } from 'src/user/entities/user.entity';
@@ -33,18 +34,26 @@ export class Company {
   @Column({ nullable: true })
   logo: string;
 
-  @CreateDateColumn({ name: 'fecha_creacion' })
+  @CreateDateColumn({
+    name: 'fecha_creacion',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP'
+  })
   created_at: Date;
 
-  @DeleteDateColumn({ name: 'fecha_deteted' })
-  deletedAt?: Date;
-
-  @Column({
+  @UpdateDateColumn({
     name: 'fecha_update',
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP'
   })
   update_at: Date;
+
+  @DeleteDateColumn({
+    name: 'fecha_deleted',
+    type: 'timestamp',
+    nullable: true
+  })
+  deletedAt?: Date | null;
 
   @OneToMany(() => Employee, (employee) => employee.company)
   employees: Employee[];
