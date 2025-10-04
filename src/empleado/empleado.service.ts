@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Employee } from './entities/empleado.entity';
 import { CreateEmployeeDto } from './dto/create-empleado.dto';
 import { UpdateEmployeeDto } from './dto/update-empleado.dto';
+import { SearchEmpleadoDto } from './dto/search-empleado.dto';
 
 @Injectable()
 export class EmpleadoService {
@@ -37,29 +38,27 @@ export class EmpleadoService {
   }
 
   //probando busqueda por id, dni o last_name
-  async findByDni(dni: number): Promise<Employee> {
-    const employee = await this.employeeRepository.findOne({
-      where: { dni },
-      relations: ['company', 'plan'],
-    });
-    if (!employee) {
-      throw new NotFoundException(`Suscripción con DNI ${dni} no encontrada`);
-    }
-    return employee;
+   async search(searchDto: SearchEmpleadoDto): Promise<Employee[]> {
+  const { id, dni, last_name } = searchDto;
+
+  const where: any = {};
+
+  if (id) where.id = id;
+  if (dni) where.dni = dni;
+  if (last_name) where.last_name = last_name;
+
+  const employees = await this.employeeRepository.find({
+    where,
+    relations: ['company', 'department', 'user'], // ajusta según tu entidad
+  });
+
+  if (!employees || employees.length === 0) {
+    throw new NotFoundException('No se encontraron empleados con esos criterios');
   }
 
-  async findByLastName(lastName: string): Promise<Employee> {
-    const employee = await this.employeeRepository.findOne({
-      where: { last_name: lastName },
-      relations: ['company', 'plan'],
-    });
-    if (!employee) {
-      throw new NotFoundException(
-        `Suscripción con apellido "${lastName}" no encontrada`,
-      );
-    }
-    return employee;
-  } 
+  return employees;
+}
+
 
   async update(id: string, updateEmployeeDto: UpdateEmployeeDto): Promise<Employee> {
     await this.employeeRepository.update(id, updateEmployeeDto);
