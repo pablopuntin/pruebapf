@@ -12,11 +12,10 @@ export class SuscripcionService {
     private readonly suscripcionRepository: Repository<Suscripcion>
   ) {}
 
-  /*
-  async create(
+  /*  async create(
     createSuscripcionDto: CreateSuscripcionDto
   ): Promise<Suscripcion> {
-    // Generar token único para la suscripción
+    // Generar token único para la suscripción  
     const token = this.generateUniqueToken();
 
     const suscripcion:Suscripcion = this.suscripcionRepository.create({
@@ -25,8 +24,7 @@ export class SuscripcionService {
     });
 
     return await this.suscripcionRepository.save(suscripcion);
-  }
-    */
+  }*/
 
   async findAll(): Promise<Suscripcion[]> {
     return await this.suscripcionRepository.find({
