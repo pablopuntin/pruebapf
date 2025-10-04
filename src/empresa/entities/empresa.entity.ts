@@ -31,8 +31,8 @@ export class Company {
   @Column({ nullable: true })
   email: string;
 
-  @Column({ nullable: true })
-  logo: string;
+  @Column({ type: 'text', nullable: true })
+  logo: string | null;
 
   @CreateDateColumn({
     name: 'fecha_creacion',

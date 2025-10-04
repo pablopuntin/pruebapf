@@ -15,10 +15,12 @@ import { UpdateSuscripcionDto } from './dto/update-suscripcion.dto';
 export class SuscripcionController {
   constructor(private readonly suscripcionService: SuscripcionService) {}
 
+  /*
   @Post()
   create(@Body() createSuscripcionDto: CreateSuscripcionDto) {
     return this.suscripcionService.create(createSuscripcionDto);
   }
+    */
 
   @Get()
   findAll() {
