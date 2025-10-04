@@ -10,6 +10,7 @@ import {
 import { EmpleadoService } from './empleado.service';
 import { CreateEmployeeDto } from './dto/create-empleado.dto';
 import { UpdateEmployeeDto } from './dto/update-empleado.dto';
+import { SearchEmpleadoDto } from './dto/search-empleado.dto';
 
 @Controller('empleado')
 export class EmpleadoController {
