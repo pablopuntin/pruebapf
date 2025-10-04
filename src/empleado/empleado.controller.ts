@@ -10,6 +10,7 @@ import {
 import { EmpleadoService } from './empleado.service';
 import { CreateEmployeeDto } from './dto/create-empleado.dto';
 import { UpdateEmployeeDto } from './dto/update-empleado.dto';
+import { Employee } from './entities/empleado.entity';
 
 @Controller('empleado')
 export class EmpleadoController {
@@ -25,15 +26,20 @@ export class EmpleadoController {
     return this.empleadoService.findAll();
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.empleadoService.findOne(id);
-  // }
+  @Get(':id')
+  indOne(@Param('id') id: string) {
+    return this.empleadoService.findOne(id);
+  }
 
   //probando busqueda por id, dni o last_name
-  @Get(':param')
-  findOne(@Param('param') param: string) {
-    return this.empleadoService.findOne(param);
+  @Get('dni/:dni')
+  findByDni(@Param('dni') dni: number): Promise<Employee> {
+    return this.empleadoService.findByDni(dni);
+  }
+
+  @Get('last-name/:lastName')
+  findByLastName(@Param('lastName') lastName: string): Promise<Employee> {
+    return this.empleadoService.findByLastName(lastName);
   }
 
 

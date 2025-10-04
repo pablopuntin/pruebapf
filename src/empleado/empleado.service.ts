@@ -30,40 +30,36 @@ export class EmpleadoService {
     return this.employeeRepository.find();
   }
 
-  // async findOne(id: string): Promise<Employee> {
-  //   const employee = await this.employeeRepository.findOne({ where: { id } });
-  //   if (!employee) throw new NotFoundException(`Empleado con ID ${id} no encontrado`);
-  //   return employee;
-  // }
-
-  //probando busqueda por id, dni o last_name
-  async findOne(param: string): Promise<Employee> {
-  // Verificamos si el parámetro es numérico (para dni)
-  const isNumber = !isNaN(Number(param));
-
-  const whereClause = isNumber
-    ? [
-        { dni: Number(param) },     // si es número, busca por dni
-        { id: param },              // también busca por id
-        { last_name: param },       // y por apellido
-      ]
-    : [
-        { id: param },              // si no es número, solo por id
-        { last_name: param },       // o por apellido
-      ];
-
-  const employee = await this.employeeRepository.findOne({
-    where: whereClause,
-  });
-
-  if (!employee) {
-    throw new NotFoundException(
-      `Empleado con identificador/dni/apellido "${param}" no encontrado`,
-    );
+  async findOne(id: string): Promise<Employee> {
+    const employee = await this.employeeRepository.findOne({ where: { id } });
+    if (!employee) throw new NotFoundException(`Empleado con ID ${id} no encontrado`);
+    return employee;
   }
 
-  return employee;
-}
+  //probando busqueda por id, dni o last_name
+  async findByDni(dni: number): Promise<Employee> {
+    const employee = await this.employeeRepository.findOne({
+      where: { dni },
+      relations: ['company', 'plan'],
+    });
+    if (!employee) {
+      throw new NotFoundException(`Suscripción con DNI ${dni} no encontrada`);
+    }
+    return employee;
+  }
+
+  async findByLastName(lastName: string): Promise<Employee> {
+    const employee = await this.employeeRepository.findOne({
+      where: { last_name: lastName },
+      relations: ['company', 'plan'],
+    });
+    if (!employee) {
+      throw new NotFoundException(
+        `Suscripción con apellido "${lastName}" no encontrada`,
+      );
+    }
+    return employee;
+  } 
 
   async update(id: string, updateEmployeeDto: UpdateEmployeeDto): Promise<Employee> {
     await this.employeeRepository.update(id, updateEmployeeDto);
