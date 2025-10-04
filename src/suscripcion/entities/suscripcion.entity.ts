@@ -19,8 +19,8 @@ export class Suscripcion {
   @Column({ type: 'timestamp' })
   end_date: Date;
 
-  //@Column({ unique: true })
-  //token: string;
+  /*  @Column({ unique: true })
+  token: string;*/
 
   @ManyToOne(() => Company, (companie) => companie.suscripciones)
   @JoinColumn({ name: 'company_id' })
