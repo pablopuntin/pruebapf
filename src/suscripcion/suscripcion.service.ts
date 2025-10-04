@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateSuscripcionDto } from './dto/update-suscripcion.dto';
 import { Suscripcion } from './entities/suscripcion.entity';
+import { CreateSuscripcionDto } from './dto/create-suscripcion.dto';
 
 @Injectable()
 export class SuscripcionService {
@@ -18,7 +19,7 @@ export class SuscripcionService {
     // Generar token único para la suscripción
     const token = this.generateUniqueToken();
 
-    const suscripcion = this.suscripcionRepository.create({
+    const suscripcion:Suscripcion = this.suscripcionRepository.create({
       ...createSuscripcionDto,
       token
     });

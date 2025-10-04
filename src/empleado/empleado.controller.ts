@@ -25,10 +25,17 @@ export class EmpleadoController {
     return this.empleadoService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.empleadoService.findOne(id);
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.empleadoService.findOne(id);
+  // }
+
+  //probando busqueda por id, dni o last_name
+  @Get(':param')
+  findOne(@Param('param') param: string) {
+    return this.empleadoService.findOne(param);
   }
+
 
   @Patch(':id')
   update(
