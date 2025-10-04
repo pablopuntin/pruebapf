@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, MaxLength } from 'class-validator';
 
 export class CreateDepartamentoDto {
   @ApiProperty({
@@ -16,5 +16,6 @@ export class CreateDepartamentoDto {
   })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(250)
   descripcion: string;
 }
