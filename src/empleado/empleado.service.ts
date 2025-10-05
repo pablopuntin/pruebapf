@@ -45,7 +45,7 @@ export class EmpleadoService {
 //tomando user.company de la request 
 async create(createEmployeeDto: CreateEmployeeDto, user: User): Promise<Employee> {
   try {
-    const employee = this.employeeRepository.create({
+   const employee = this.employeeRepository.create({
       ...createEmployeeDto,
       //company: user.company, // multi-tenant seguro
       user: user,            // relación uno a uno con el user autenticado
@@ -53,7 +53,6 @@ async create(createEmployeeDto: CreateEmployeeDto, user: User): Promise<Employee
 
     return await this.employeeRepository.save(employee);
   } catch (error) {
-    console.error('Error al crear empleado:', error);
     throw new InternalServerErrorException('No se pudo crear el empleado');
   }
 }
