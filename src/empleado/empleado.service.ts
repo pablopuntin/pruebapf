@@ -14,6 +14,20 @@ export class EmpleadoService {
     private readonly employeeRepository: Repository<Employee>
   ) {}
 
+  //funcion para calcular edad
+  private calculateAge(birthdate: Date): number {
+  const today = new Date();
+  const birth = new Date(birthdate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+
+  return age;
+}
+
   async create(createEmployeeDto: CreateEmployeeDto): Promise<Employee> {
   try {
   const employee = this.employeeRepository.create(createEmployeeDto);
@@ -27,20 +41,60 @@ export class EmpleadoService {
   }
 }
 
-  async findAll(): Promise<Employee[]> {
-    return this.employeeRepository.find();
-  }
+  // async findAll(): Promise<Employee[]> {
+  //   return this.employeeRepository.find();
+  // }
+  //con age dinamico
+  async findAll(): Promise<(Employee & { age?: number })[]> {
+  const employees = await this.employeeRepository.find();
+  return employees.map(emp => ({
+    ...emp,
+    age: emp.birthdate ? this.calculateAge(emp.birthdate) : undefined,
+  }));
+}
 
-  async findOne(id: string): Promise<Employee> {
-    const employee = await this.employeeRepository.findOne({ where: { id } });
-    if (!employee) throw new NotFoundException(`Empleado con ID ${id} no encontrado`);
-    return employee;
-  }
 
-  //probando busqueda por id, dni o last_name
-   async search(searchDto: SearchEmpleadoDto): Promise<Employee[]> {
+
+  // async findOne(id: string): Promise<Employee> {
+  //   const employee = await this.employeeRepository.findOne({ where: { id } });
+  //   if (!employee) throw new NotFoundException(`Empleado con ID ${id} no encontrado`);
+  //   return employee;
+  // }
+
+  //funcion con edad dinamica
+async findOne(id: string): Promise<Employee & { age?: number }> {
+  const employee = await this.employeeRepository.findOne({ where: { id } });
+  if (!employee) throw new NotFoundException(`Empleado con ID ${id} no encontrado`);
+
+  const age = employee.birthdate ? this.calculateAge(employee.birthdate) : undefined;
+
+  return { ...employee, age };
+}
+
+//probando busqueda por id, dni o last_name
+//    async search(searchDto: SearchEmpleadoDto): Promise<Employee[]> {
+//   const { id, dni, last_name } = searchDto;
+
+//   const where: any = {};
+
+//   if (id) where.id = id;
+//   if (dni) where.dni = dni;
+//   if (last_name) where.last_name = last_name;
+
+//   const employees = await this.employeeRepository.find({
+//     where,
+//     relations: ['company', 'department', 'user'], // ajusta según tu entidad
+//   });
+
+//   if (!employees || employees.length === 0) {
+//     throw new NotFoundException('No se encontraron empleados con esos criterios');
+//   }
+
+//   return employees;
+// }
+//con age dinamico
+async search(searchDto: SearchEmpleadoDto): Promise<(Employee & { age?: number })[]> {
   const { id, dni, last_name } = searchDto;
-
   const where: any = {};
 
   if (id) where.id = id;
@@ -49,16 +103,18 @@ export class EmpleadoService {
 
   const employees = await this.employeeRepository.find({
     where,
-    relations: ['company', 'department', 'user'], // ajusta según tu entidad
+    relations: ['company', 'department', 'user'],
   });
 
   if (!employees || employees.length === 0) {
     throw new NotFoundException('No se encontraron empleados con esos criterios');
   }
 
-  return employees;
+  return employees.map(emp => ({
+    ...emp,
+    age: emp.birthdate ? this.calculateAge(emp.birthdate) : undefined,
+  }));
 }
-
 
   async update(id: string, updateEmployeeDto: UpdateEmployeeDto): Promise<Employee> {
     await this.employeeRepository.update(id, updateEmployeeDto);
@@ -68,4 +124,7 @@ export class EmpleadoService {
   async remove(id: string): Promise<void> {
     await this.employeeRepository.softDelete(id);
   }
+
+  
+
 }

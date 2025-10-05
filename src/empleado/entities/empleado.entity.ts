@@ -41,9 +41,6 @@ export class Employee {
   @Column()
   last_name: string;
 
-  @Column({ type: 'int', nullable: true })
-  age: number;
-
   @Column({ unique: true, type: 'int' })
   dni: number;
 
