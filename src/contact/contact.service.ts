@@ -9,8 +9,9 @@ export class ContactService {
   private readonly fromEmail: string;
 
   constructor(private configService: ConfigService) {
-    sgMail.setApiKey(this.configService.get<string>('SENDGRID_API_KEY'));
-    this.fromEmail = this.configService.get<string>('SENDGRID_FROM');
+    sgMail.setApiKey(this.configService.get<string>('SENDGRID_API_KEY')!);
+this.fromEmail = this.configService.get<string>('SENDGRID_FROM')!;
+
   }
 
   async sendContactEmail(
@@ -54,7 +55,7 @@ export class ContactService {
         <hr>
         <p><strong>Mensaje:</strong></p>
         <p>${data.mensaje}</p>
-      `,
+      `
     };
   }
 
@@ -72,7 +73,7 @@ export class ContactService {
         <hr>
         <p><strong>Equipo HR System</strong><br>
         Email: hrsystemproyecto@gmail.com</p>
-      `,
+      `
     };
   }
 
