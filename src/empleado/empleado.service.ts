@@ -6,6 +6,7 @@ import { Employee } from './entities/empleado.entity';
 import { CreateEmployeeDto } from './dto/create-empleado.dto';
 import { UpdateEmployeeDto } from './dto/update-empleado.dto';
 import { SearchEmpleadoDto } from './dto/search-empleado.dto';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class EmpleadoService {
@@ -28,18 +29,35 @@ export class EmpleadoService {
   return age;
 }
 
-  async create(createEmployeeDto: CreateEmployeeDto): Promise<Employee> {
+//   async create(createEmployeeDto: CreateEmployeeDto): Promise<Employee> {
+//   try {
+//   const employee = this.employeeRepository.create(createEmployeeDto);
+//     return await this.employeeRepository.save(employee);
+//   } catch (error) {
+//     // Puedes loguear el error si lo necesitas
+//     console.error('Error al crear empleado:', error);
+
+//     // Lanzar una excepción HTTP con un mensaje personalizado
+//   throw new InternalServerErrorException('No se pudo crear el empleado');
+//   }
+// }
+
+//tomando user.company de la request 
+async create(createEmployeeDto: CreateEmployeeDto, user: User): Promise<Employee> {
   try {
-  const employee = this.employeeRepository.create(createEmployeeDto);
+    const employee = this.employeeRepository.create({
+      ...createEmployeeDto,
+      company: user.company, // multi-tenant seguro
+      user: user,            // relación uno a uno con el user autenticado
+    });
+
     return await this.employeeRepository.save(employee);
   } catch (error) {
-    // Puedes loguear el error si lo necesitas
     console.error('Error al crear empleado:', error);
-
-    // Lanzar una excepción HTTP con un mensaje personalizado
-  throw new InternalServerErrorException('No se pudo crear el empleado');
+    throw new InternalServerErrorException('No se pudo crear el empleado');
   }
 }
+
 
   // async findAll(): Promise<Employee[]> {
   //   return this.employeeRepository.find();
