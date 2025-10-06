@@ -8,7 +8,14 @@ export const config: ConfigParams = {
   clientID: AUTH0_CLIENTID,
   issuerBaseURL: 'https://dev-hrsystem.us.auth0.com',
   routes: {
-    callback: '/callback'
+    login: false, // ❌ desactivamos login automático
+    logout: false, // ❌ desactivamos logout automático
+    callback: '/callback' // ruta a la que Auth0 redirige después de login
+  },
+  idpLogout: true, // al hacer logout también se borra la sesión en Auth0
+  authorizationParams: {
+    response_type: 'code',
+    scope: 'openid profile email'
   },
   //Después de login, redirigir al frontend
   afterCallback: async (req, res, session) => {
