@@ -10,8 +10,11 @@ export const config: ConfigParams = {
   routes: {
     callback: '/callback'
   },
+  //Después de login, redirigir al frontend
   afterCallback: async (req, res, session) => {
-    res.redirect('https://front-git-main-hr-systems-projects.vercel.app/');
+    res.redirect(
+      'https://front-git-main-hr-systems-projects.vercel.app/dashboard'
+    );
     return session;
   }
 };
