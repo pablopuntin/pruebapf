@@ -14,6 +14,7 @@ import { RolModule } from './rol/rol.module';
 import { PositionModule } from './position/position.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { AbsenceModule } from './absence/absence.module';
 
 //--------------SEEDER----------------//
 import { AppService } from './app.service';
@@ -41,6 +42,7 @@ import { Rol } from './rol/entities/rol.entity';
     PositionModule,
     AuthModule,
     UserModule,
+    AbsenceModule,
     TypeOrmModule.forFeature([Plan, Rol])
     // ...otros módulos
   ],
