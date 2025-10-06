@@ -23,7 +23,8 @@ export const config: ConfigParams = {
   authorizationParams: {
     response_type: 'code',
     scope: 'openid profile email'
-  },
+  }
+  /*
   //Después de login, redirigir al frontend
   afterCallback: async (req, res, session) => {
     res.redirect(
@@ -31,4 +32,5 @@ export const config: ConfigParams = {
     );
     return session;
   }
+  */
 };
