@@ -1,11 +1,18 @@
 import { ConfigParams } from 'express-openid-connect';
-import { AUTH0_BASEURL, AUTH0_CLIENTID, AUTH0_SECRET } from './auth0.envs';
+import {
+  AUTH0_BASEURL,
+  AUTH0_CLIENTID,
+  AUTH0_SECRET,
+  AUTH0_CLIENTSECRET
+} from './auth0.envs';
+
 export const config: ConfigParams = {
   authRequired: false,
   auth0Logout: true,
   secret: AUTH0_SECRET,
   baseURL: AUTH0_BASEURL ?? 'http://localhost:3000',
   clientID: AUTH0_CLIENTID,
+  clientSecret: AUTH0_CLIENTSECRET,
   issuerBaseURL: 'https://dev-hrsystem.us.auth0.com',
   routes: {
     login: false, // ❌ desactivamos login automático
