@@ -10,16 +10,16 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   //-----Configuracion de Auth0------//
-  app.use(auth(auth0Config));
+  // app.use(auth(auth0Config));
 
-  const server = app.getHttpAdapter().getInstance();
+  // const server = app.getHttpAdapter().getInstance();
 
-  //Borra la cookie local y hace logout en Auth0
-  server.get('/logout', (req, res) => {
-    res.oidc.logout({
-      returnTo: 'https://front-git-main-hr-systems-projects.vercel.app'
-    });
-  });
+  // //Borra la cookie local y hace logout en Auth0
+  // server.get('/logout', (req, res) => {
+  //   res.oidc.logout({
+  //     returnTo: 'https://front-git-main-hr-systems-projects.vercel.app'
+  //   });
+  // });
 
   // Activar validación global
   app.useGlobalPipes(
