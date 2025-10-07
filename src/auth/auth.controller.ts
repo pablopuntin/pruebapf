@@ -1,5 +1,6 @@
 import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { CreateCompanyDto } from 'src/empresa/dto/create-empresa.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -13,10 +14,13 @@ export class AuthController {
   //   const jwt = await this.authService.exchangeAuth0Token(idToken);
   //   return { access_token: jwt };
   // }
-
-  @Post('login')
-async login(@Body('email') email: string) {
-  return this.authService.login(email);
+@Post('registroInicial')
+async registroInicial(@Body() dto: {
+  email: string;
+  first_name: string;
+  empresa: CreateCompanyDto;
+}) {
+  return this.authService.registerInitialUser(dto);
 }
 
 }

@@ -82,6 +82,7 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/user/entities/user.entity';
 import { Company } from 'src/empresa/entities/empresa.entity';
 import { Rol } from 'src/rol/entities/rol.entity';
+import { CreateCompanyDto } from 'src/empresa/dto/create-empresa.dto';
 
 @Injectable()
 export class AuthService {
@@ -96,45 +97,33 @@ export class AuthService {
   ) {}
 
   // 🔐 Login temporal sin Auth0
-  async login(email: string): Promise<string> {
-    if (!email) {
-      throw new UnauthorizedException('Email is required');
-    }
+  async registerInitialUser(dto: {
+  email: string;
+  first_name: string;
+  empresa: CreateCompanyDto;
+}): Promise<string> {
+  const empresa = this.companiesRepo.create(dto.empresa);
+  await this.companiesRepo.save(empresa);
 
-    let user = await this.usersRepo.findOne({
-      where: { email },
-      relations: ['company', 'role'],
-    });
+  const defaultRole = await this.rolesRepo.findOne({ where: { name: 'HR_MANAGER' } });
+  if (!defaultRole) throw new UnauthorizedException('Rol HR_MANAGER no encontrado');
 
-    if (!user) {
-      const defaultRole = await this.rolesRepo.findOne({
-        where: { name: 'USER' },
-      });
+  const user = this.usersRepo.create({
+    email: dto.email,
+    first_name: dto.first_name,
+    role: defaultRole,
+    company: empresa,
+  });
+  await this.usersRepo.save(user);
 
-      if (!defaultRole) {
-        throw new UnauthorizedException('Default role "USER" not found');
-      }
+  const payload = {
+    sub: user.id,
+    email: user.email,
+    companyId: empresa.id,
+    suscripcionId: empresa.suscripciones?.[0]?.id || null,
+    roles: [defaultRole.name],
+  };
 
-      user = this.usersRepo.create({
-        email,
-        first_name: 'Test User',
-        role: defaultRole,
-        company: null,
-      });
-
-      await this.usersRepo.save(user);
-    }
-
-    const company = user.company || null;
-    const roleName = user.role?.name || 'USER';
-
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      companyId: company?.id || null,
-      roles: [roleName],
-    };
-
-    return this.jwtService.sign(payload, { expiresIn: '15m' });
-  }
+  return this.jwtService.sign(payload, { expiresIn: '15m' });
+}
 }
