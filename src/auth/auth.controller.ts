@@ -18,8 +18,19 @@ export class AuthController {
 
   // Callback → Auth0 ya emitió la cookie, redirige al frontend
   @Get('/callback')
-  callback(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    res.redirect(
+  callback(@Req() req: Request, @Res() res: Response) {
+    const user = req.oidc?.user;
+
+    if (!user) {
+      return res.redirect(
+        'https://front-git-main-hr-systems-projects.vercel.app'
+      );
+    }
+
+    this.authService.generateAppToken(user, res);
+
+    // redirigimos al frontend
+    return res.redirect(
       'https://front-git-main-hr-systems-projects.vercel.app/dashboard'
     );
   }
@@ -33,7 +44,7 @@ export class AuthController {
   }
 
   @Post('onboarding')
-  create(@Body() newRegister: CreateRegisterDto) {
+  async create(@Body() newRegister: CreateRegisterDto) {
     return this.authService.create(newRegister);
   }
 }

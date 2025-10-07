@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getTypeOrmConfig } from './config/typeorm.config';
+import { JwtModule } from '@nestjs/jwt';
 
 import { AppController } from './app.controller';
 import { EmpresaModule } from './empresa/empresa.module';
@@ -16,6 +17,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { AbsenceModule } from './absence/absence.module';
 import { ContactModule } from './contact/contact.module';
+import { JWT_SECRET } from './config/auth0.envs';
 
 //--------------SEEDER----------------//
 import { AppService } from './app.service';
@@ -33,6 +35,11 @@ import { Rol } from './rol/entities/rol.entity';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: getTypeOrmConfig
+    }),
+    JwtModule.register({
+      global: true,
+      secret: JWT_SECRET,
+      signOptions: { expiresIn: '10h' }
     }),
     EmpresaModule,
     EmpleadoModule,
