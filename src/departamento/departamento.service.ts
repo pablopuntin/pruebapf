@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { CreateDepartamentoDto } from './dto/create-departamento.dto';
 import { UpdateDepartamentoDto } from './dto/update-departamento.dto';
 import { Departamento } from './entities/departamento.entity';
@@ -52,21 +52,50 @@ export class DepartamentoService {
     await this.departamentoRepository.softDelete(id);
   }
 
-  async seedDepartamentos(): Promise<void> {
-    for (const depData of DEPARTAMENTOS_BASE) {
-      const existing = await this.departamentoRepo.findOne({
-        where: { nombre: ILike(depData.nombre) }, // 👈 case-insensitive
+  // async seedDepartamentos(): Promise<void> {
+  //   for (const depData of DEPARTAMENTOS_BASE) {
+  //     const existing = await this.departamentoRepo.findOne({
+  //       where: { nombre: ILike(depData.nombre) }, // 👈 case-insensitive
+  //     });
+  //     if (!existing) {
+  //       const nuevo = this.departamentoRepo.create(depData);
+  //       await this.departamentoRepo.save(nuevo);
+  //     }
+  //   }
+  //   console.log('✅ Departamentos precargados correctamente');
+  // }
+
+  // async findByName(nombre: string): Promise<Departamento | null> {
+  //   return this.departamentoRepo.findOne({ where: { nombre: ILike(nombre) } });
+  // }
+
+  //codigo chatgpt
+   async seedDepartamentos(): Promise<void> {
+    const departamentos = [
+      { nombre: 'Recursos Humanos' },
+      { nombre: 'Tecnología' },
+      { nombre: 'Ventas' },
+      { nombre: 'Finanzas' },
+    ];
+
+    for (const depData of departamentos) {
+      const existing = await this.departamentoRepository.findOne({
+        where: { nombre: ILike(depData.nombre) }, // 👈 ILike importado
       });
+
       if (!existing) {
-        const nuevo = this.departamentoRepo.create(depData);
-        await this.departamentoRepo.save(nuevo);
+        const nuevo = this.departamentoRepository.create(depData);
+        await this.departamentoRepository.save(nuevo);
       }
     }
-    console.log('✅ Departamentos precargados correctamente');
+
+    console.log('✅ Departamentos sembrados correctamente.');
   }
 
-  async findByName(nombre: string): Promise<Departamento | null> {
-    return this.departamentoRepo.findOne({ where: { nombre: ILike(nombre) } });
+  async findByName(nombre: string) {
+    return this.departamentoRepository.findOne({
+      where: { nombre: ILike(nombre) },
+    });
   }
 
 }

@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
 import { PositionResponseDto } from './dto/position-response.dto';
 import { Position } from './entities/position.entity';
 import { POSICIONES_BASE } from './data/position.data';
 import { DepartamentoService } from 'src/departamento/departamento.service';
+import { Repository, ILike } from 'typeorm';
 
 @Injectable()
 export class PositionService {
@@ -75,23 +75,47 @@ export class PositionService {
     await this.positionRepository.softDelete(id);
   }
 
-  //seeder de precarga de posiciones
-   async seedPositions(): Promise<void> {
-    for (const posData of POSICIONES_BASE) {
-      const existing = await this.positionRepo.findOne({
-        where: { name: ILike(posData.name) }, // 👈 case-insensitive
+  // //seeder de precarga de posiciones
+  //  async seedPositions(): Promise<void> {
+  //   for (const posData of POSICIONES_BASE) {
+  //     const existing = await this.positionRepo.findOne({
+  //       where: { name: ILike(posData.name) }, // 👈 case-insensitive
+  //     });
+
+  //     if (!existing) {
+  //       const departamento = await this.departamentoService.findByName(posData.departamento);
+  //       const nueva = this.positionRepo.create({
+  //         name: posData.name,
+  //         description: posData.description,
+  //         departamento,
+  //       });
+  //       await this.positionRepo.save(nueva);
+  //     }
+  //   }
+  //   console.log('✅ Posiciones precargadas correctamente');
+  // }
+
+  //codigo chatgpt
+
+  async seedPositions(): Promise<void> {
+    const positions = [
+      { name: 'Gerente' },
+      { name: 'Desarrollador' },
+      { name: 'Vendedor' },
+      { name: 'Contador' },
+    ];
+
+    for (const posData of positions) {
+      const existing = await this.positionRepository.findOne({
+        where: { name: ILike(posData.name) },
       });
 
       if (!existing) {
-        const departamento = await this.departamentoService.findByName(posData.departamento);
-        const nueva = this.positionRepo.create({
-          name: posData.name,
-          description: posData.description,
-          departamento,
-        });
-        await this.positionRepo.save(nueva);
+        const nueva = this.positionRepository.create(posData);
+        await this.positionRepository.save(nueva);
       }
     }
-    console.log('✅ Posiciones precargadas correctamente');
+
+    console.log('✅ Posiciones sembradas correctamente.');
   }
 }
