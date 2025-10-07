@@ -18,7 +18,7 @@ export class Departamento {
   @Column({ unique: true })
   nombre: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true })
   descripcion: string;
 
   @CreateDateColumn({
