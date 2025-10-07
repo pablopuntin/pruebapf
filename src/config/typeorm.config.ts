@@ -40,15 +40,17 @@ export const getTypeOrmConfig = (
 
   return {
     type: 'postgres',
-    url: databaseUrl || undefined,
-    host: config.get<string>('DB_HOST'),
-    port: config.get<number>('DB_PORT') || 5432,
-    username: config.get<string>('DB_USERNAME'),
-    password: config.get<string>('DB_PASSWORD'),
-    database: config.get<string>('DB_NAME'),
-    ssl: databaseUrl ? { rejectUnauthorized: false } : false,
+    url: databaseUrl,
+    ssl: {
+      rejectUnauthorized: false
+    },
+    extra: {
+      ssl: {
+        rejectUnauthorized: false
+      }
+    },
     autoLoadEntities: true,
-    synchronize: false,
-    dropSchema: false
+    synchronize: true, // ⚠️ solo si querés borrar y recrear todo
+    dropSchema: true // ⚠️ solo si querés borrar y recrear todo
   };
 };
