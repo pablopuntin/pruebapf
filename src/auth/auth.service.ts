@@ -83,6 +83,7 @@ import { User } from 'src/user/entities/user.entity';
 import { Company } from 'src/empresa/entities/empresa.entity';
 import { Rol } from 'src/rol/entities/rol.entity';
 import { CreateCompanyDto } from 'src/empresa/dto/create-empresa.dto';
+import { RegistroInicialDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -97,22 +98,19 @@ export class AuthService {
   ) {}
 
   // 🔐 Login temporal sin Auth0
-  async registerInitialUser(dto: {
-  email: string;
-  first_name: string;
-  empresa: CreateCompanyDto;
-}): Promise<string> {
+  async registerInitialUser(dto: RegistroInicialDto): Promise<string> {
   const empresa = this.companiesRepo.create(dto.empresa);
   await this.companiesRepo.save(empresa);
 
   const defaultRole = await this.rolesRepo.findOne({ where: { name: 'HR_MANAGER' } });
-  if (!defaultRole) throw new UnauthorizedException('Rol HR_MANAGER no encontrado');
 
   const user = this.usersRepo.create({
     email: dto.email,
     first_name: dto.first_name,
-    role: defaultRole,
-    company: empresa,
+    last_name: dto.last_name,
+   profile_image_url: dto.profile_image_url ?? undefined,
+    role: defaultRole!,
+    company: empresa
   });
   await this.usersRepo.save(user);
 
@@ -121,9 +119,10 @@ export class AuthService {
     email: user.email,
     companyId: empresa.id,
     suscripcionId: empresa.suscripciones?.[0]?.id || null,
-    roles: [defaultRole.name],
+    roles: [defaultRole!.name],
   };
 
   return this.jwtService.sign(payload, { expiresIn: '15m' });
 }
+
 }
