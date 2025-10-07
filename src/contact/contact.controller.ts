@@ -12,7 +12,7 @@ export class ContactController {
   @ApiOperation({
     summary: 'Enviar mensaje de contacto',
     description:
-      'Envía un mensaje de contacto desde el formulario web. Se enviará tanto al equipo de HR System como un email de confirmación al usuario.',
+      'Envía un mensaje de contacto desde el formulario web. Se enviará tanto al equipo de HR System como un email de confirmación al usuario.'
   })
   @ApiResponse({
     status: 200,
@@ -24,10 +24,10 @@ export class ContactController {
         message: {
           type: 'string',
           example:
-            'Mensaje enviado exitosamente. Te responderemos en menos de 24 horas.',
-        },
-      },
-    },
+            'Mensaje enviado exitosamente. Te responderemos en menos de 24 horas.'
+        }
+      }
+    }
   })
   async sendContactMessage(@Body() contactData: ContactFormDto) {
     return await this.contactService.sendContactEmail(contactData);
@@ -36,7 +36,7 @@ export class ContactController {
   @Get('health')
   @ApiOperation({
     summary: 'Verificar estado del servicio de email',
-    description: 'Verifica que la configuración de SendGrid esté presente',
+    description: 'Verifica que la configuración de SendGrid esté presente'
   })
   @ApiResponse({
     status: 200,
@@ -45,16 +45,16 @@ export class ContactController {
       type: 'object',
       properties: {
         status: { type: 'string', example: 'ok' },
-        emailService: { type: 'boolean', example: true },
-      },
-    },
+        emailService: { type: 'boolean', example: true }
+      }
+    }
   })
   async checkEmailService() {
     const apiKey = this.contactService.getApiKey();
     return {
       status: 'ok',
       emailService: !!apiKey,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     };
   }
 }
