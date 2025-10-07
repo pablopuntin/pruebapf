@@ -45,7 +45,7 @@ export class User {
   @Column({
     type: 'varchar',
     length: 50,
-    nullable: true,
+    nullable: true
   })
   last_name?: string;
 

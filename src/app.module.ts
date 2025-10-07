@@ -11,10 +11,9 @@ import { DepartamentoModule } from './departamento/departamento.module';
 import { PlanModule } from './plan/plan.module';
 import { RolModule } from './rol/rol.module';
 import { PositionModule } from './position/position.module';
-import { AuthModule } from './auth/auth,module';
+import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { ContactModule } from './contact/contact.module';
-
 
 //--------------SEEDER----------------//
 import { AppService } from './app.service';
@@ -51,6 +50,6 @@ import { AuthController } from './auth/auth.controller';
     // ...otros módulos
   ],
   controllers: [AppController, AuthController],
-  providers: [AppService, PlanService, RolService, AuthService]
+  providers: [AppService, PlanService, RolService]
 })
 export class AppModule {}

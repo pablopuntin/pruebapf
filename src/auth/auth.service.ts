@@ -16,7 +16,7 @@ export class AuthService {
     private readonly companiesRepo: Repository<Company>,
     @InjectRepository(Rol)
     private readonly rolesRepo: Repository<Rol>,
-    private readonly jwtService: JwtService,
+    private readonly jwtService: JwtService
   ) {}
 
   // Valida el token de Auth0 y genera un JWT interno

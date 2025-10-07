@@ -8,9 +8,11 @@ import { JwtStrategy } from './jwt.strategy';
 import { User } from 'src/user/entities/user.entity';
 import { Company } from 'src/empresa/entities/empresa.entity';
 import { Rol } from 'src/rol/entities/rol.entity';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
+    UserModule,
     TypeOrmModule.forFeature([User, Company, Rol]),
     PassportModule,
     JwtModule.register({
