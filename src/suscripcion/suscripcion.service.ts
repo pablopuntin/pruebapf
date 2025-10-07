@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { UpdateSuscripcionDto } from './dto/update-suscripcion.dto';
 import { Suscripcion } from './entities/suscripcion.entity';
 import { CreateSuscripcionDto } from './dto/create-suscripcion.dto';
+import { NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class SuscripcionService {
@@ -12,10 +13,10 @@ export class SuscripcionService {
     private readonly suscripcionRepository: Repository<Suscripcion>
   ) {}
 
-  /*  async create(
+  async create(
     createSuscripcionDto: CreateSuscripcionDto
   ): Promise<Suscripcion> {
-    // Generar token único para la suscripción  
+    //Generar token único para la suscripción  
     const token = this.generateUniqueToken();
 
     const suscripcion:Suscripcion = this.suscripcionRepository.create({
@@ -24,10 +25,10 @@ export class SuscripcionService {
     });
 
     return await this.suscripcionRepository.save(suscripcion);
-  }*/
+  }
 
   async findAll(): Promise<Suscripcion[]> {
-    return await this.suscripcionRepository.find({
+    return this.suscripcionRepository.find({
       relations: ['company', 'plan'],
       order: { start_date: 'DESC' }
     });
@@ -40,7 +41,7 @@ export class SuscripcionService {
     });
 
     if (!suscripcion) {
-      throw new Error('Suscripción no encontrada');
+      throw new NotFoundException('Suscripción no encontrada');
     }
 
     return suscripcion;

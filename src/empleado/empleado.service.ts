@@ -58,10 +58,7 @@ async create(createEmployeeDto: CreateEmployeeDto, user: User): Promise<Employee
 }
 
 
-  // async findAll(): Promise<Employee[]> {
-  //   return this.employeeRepository.find();
-  // }
-  //con age dinamico
+  
   async findAll(): Promise<(Employee & { age?: number })[]> {
   const employees = await this.employeeRepository.find();
   return employees.map(emp => ({
@@ -70,13 +67,6 @@ async create(createEmployeeDto: CreateEmployeeDto, user: User): Promise<Employee
   }));
 }
 
-
-
-  // async findOne(id: string): Promise<Employee> {
-  //   const employee = await this.employeeRepository.findOne({ where: { id } });
-  //   if (!employee) throw new NotFoundException(`Empleado con ID ${id} no encontrado`);
-  //   return employee;
-  // }
 
   //funcion con edad dinamica
 async findOne(id: string): Promise<Employee & { age?: number }> {
@@ -88,27 +78,7 @@ async findOne(id: string): Promise<Employee & { age?: number }> {
   return { ...employee, age };
 }
 
-//probando busqueda por id, dni o last_name
-//    async search(searchDto: SearchEmpleadoDto): Promise<Employee[]> {
-//   const { id, dni, last_name } = searchDto;
 
-//   const where: any = {};
-
-//   if (id) where.id = id;
-//   if (dni) where.dni = dni;
-//   if (last_name) where.last_name = last_name;
-
-//   const employees = await this.employeeRepository.find({
-//     where,
-//     relations: ['company', 'department', 'user'], // ajusta según tu entidad
-//   });
-
-//   if (!employees || employees.length === 0) {
-//     throw new NotFoundException('No se encontraron empleados con esos criterios');
-//   }
-
-//   return employees;
-// }
 //con age dinamico
 async search(searchDto: SearchEmpleadoDto): Promise<(Employee & { age?: number })[]> {
   const { id, dni, last_name } = searchDto;
@@ -141,6 +111,40 @@ async search(searchDto: SearchEmpleadoDto): Promise<(Employee & { age?: number }
   async remove(id: string): Promise<void> {
     await this.employeeRepository.softDelete(id);
   }
+
+//con company_id
+// async search(
+//   searchDto: SearchEmpleadoDto,
+//   user: User, // el usuario autenticado
+// ): Promise<(Employee & { age?: number })[]> {
+//   const { id, dni, last_name } = searchDto;
+
+//   // Filtramos empleados solo dentro de la empresa del usuario
+//   const where: any = {
+//     company: { id: user.company.id },
+//   };
+
+//   if (id) where.id = id;
+//   if (dni) where.dni = dni;
+//   if (last_name) where.last_name = last_name;
+
+//   const employees = await this.employeeRepository.find({
+//     where,
+//     relations: ['company', 'department', 'user'],
+//   });
+
+//   if (!employees.length) {
+//     throw new NotFoundException('No se encontraron empleados con esos criterios');
+//   }
+
+//   // Registramos quién hizo la búsqueda
+//   await this.logEmployeeSearch(user, searchDto);
+
+//   return employees.map(emp => ({
+//     ...emp,
+//     age: emp.birthdate ? this.calculateAge(emp.birthdate) : undefined,
+//   }));
+// }
 
   
 

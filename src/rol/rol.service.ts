@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateRolDto } from './dto/create-rol.dto';
@@ -6,6 +6,7 @@ import { UpdateRolDto } from './dto/update-rol.dto';
 import { RolResponseDto } from './dto/rol-response.dto';
 import { Rol } from './entities/rol.entity';
 import { rol_data } from './data/rol.data';
+
 
 @Injectable()
 export class RolService {
@@ -71,4 +72,11 @@ export class RolService {
   async remove(id: string): Promise<void> {
     await this.rolRepository.delete(id);
   }
+
+  async findByName(name: string): Promise<Rol> {
+  const rol = await this.rolRepository.findOne({ where: { name } });
+  if (!rol) throw new NotFoundException('Rol no encontrado');
+  return rol;
+}
+
 }

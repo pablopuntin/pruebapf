@@ -1,5 +1,5 @@
 // src/empresa/empresa.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Company } from './entities/empresa.entity';
@@ -13,15 +13,29 @@ export class EmpresaService {
     private readonly companyRepository: Repository<Company>
   ) {}
 
-  async create(createCompanyDto: CreateCompanyDto): Promise<Company> {
-    
-    const company = this.companyRepository.create({
-      ...createCompanyDto,
-      phone_number: createCompanyDto.phone_number?.toString(), // conversión explícita
-      logo: createCompanyDto.logo // mapeo de nombre
-    });
-    return this.companyRepository.save(company);
+async create(createCompanyDto: CreateCompanyDto): Promise<Company> {
+const existing = await this.companyRepository.findOne({
+    where: [
+      { email: createCompanyDto.email },
+      { legal_name: createCompanyDto.legal_name },
+    ],
+  });
+  if (existing) {
+    throw new ConflictException('Company already exists');
   }
+
+  const company = this.companyRepository.create({
+    ...createCompanyDto,
+    phone_number: createCompanyDto.phone_number?.toString(),
+    logo: createCompanyDto.logo,
+    // created_at: new Date(),
+    // updated_at: new Date(),
+  });
+
+  return this.companyRepository.save(company);
+}
+
+
 
   async findAll(): Promise<Company[]> {
     return this.companyRepository.find();

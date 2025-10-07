@@ -1,13 +1,16 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateRegisterDto } from './dto/create-register.dto';
 
-@Controller('onboarding')
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() newRegister: CreateRegisterDto) {
-    return this.authService.create(newRegister);
+  // Recibe el id_token de Auth0, lo valida y devuelve un JWT propio
+  @Post('exchange')
+  async exchangeToken(@Body('id_token') idToken: string) {
+    if (!idToken) throw new UnauthorizedException('Missing Auth0 token');
+
+    const jwt = await this.authService.exchangeAuth0Token(idToken);
+    return { access_token: jwt };
   }
 }

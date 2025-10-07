@@ -1,125 +1,62 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateRegisterDto } from './dto/create-register.dto';
 import { Repository } from 'typeorm';
-import { Company } from 'src/empresa/entities/empresa.entity';
+import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/user/entities/user.entity';
-import { Plan } from 'src/plan/entities/plan.entity';
-import { Suscripcion } from 'src/suscripcion/entities/suscripcion.entity';
+import { Company } from 'src/empresa/entities/empresa.entity';
 import { Rol } from 'src/rol/entities/rol.entity';
-import { Role } from 'src/rol/enums/role.enum';
+import { verifyAuth0Token } from './util/ath0-verify';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
-    private readonly usersRepository: Repository<User>,
+    private readonly usersRepo: Repository<User>,
     @InjectRepository(Company)
-    private readonly companiesRepository: Repository<Company>,
-    @InjectRepository(Plan)
-    private readonly plansRepository: Repository<Plan>,
-    @InjectRepository(Suscripcion)
-    private readonly suscriptionsRepository: Repository<Suscripcion>,
+    private readonly companiesRepo: Repository<Company>,
     @InjectRepository(Rol)
-    private readonly rolesRepository: Repository<Rol>
+    private readonly rolesRepo: Repository<Rol>,
+    private readonly jwtService: JwtService,
   ) {}
 
-  //-------------Crear Registro-------------//
-  async create(newRegister: CreateRegisterDto) {
-    //Validar que no exista la empresa
-    const companyFound: Company | null = await this.companiesRepository.findOne(
-      {
-        where: [
-          { email: newRegister.email },
-          { legal_name: newRegister.legal_name }
-        ]
-      }
-    );
-
-    if (companyFound) {
-      if (companyFound.email === newRegister.email) {
-        throw new ConflictException('Email already exist.');
-      } else if (companyFound.legal_name === newRegister.legal_name) {
-        throw new ConflictException('Legal name already exist.');
-      }
-    }
-
-    //Registar en la DB la nueva empresa
-    const company = new Company();
-    company.trade_name = newRegister.trade_name;
-    company.legal_name = newRegister.legal_name;
-    company.email = newRegister.email;
-    company.logo = newRegister.logo_url;
-    company.phone_number = newRegister.phone_number;
-    company.address = newRegister.address;
-
-    await this.companiesRepository.save(company);
-
-    const companySaved = await this.companiesRepository.findOne({
-      where: { id: company.id }
+  // Valida el token de Auth0 y genera un JWT interno
+  async exchangeAuth0Token(idToken: string): Promise<string> {
+    // 1️⃣ Validar token contra Auth0
+    const auth0User = await verifyAuth0Token(idToken).catch(() => {
+      throw new UnauthorizedException('Invalid Auth0 token');
     });
 
-    if (!companySaved) {
-      throw new NotFoundException('Error, Company not found after register.');
+    if (!auth0User?.email) {
+      throw new UnauthorizedException('Auth0 user missing email');
     }
 
-    //Encontrar el Plan en la DB
-    const plan = await this.plansRepository.findOne({
-      where: { id: newRegister.plan_id }
+    // 2️⃣ Buscar usuario local por email
+    let user = await this.usersRepo.findOne({
+      where: { email: auth0User.email },
+      relations: ['company', 'role'],
     });
 
-    if (!plan) {
-      throw new NotFoundException('Error, Plan id not found.');
+    // 3️⃣ Si no existe, opcionalmente crearlo (depende de tu lógica)
+    if (!user) {
+      user = this.usersRepo.create({
+        email: auth0User.email,
+        first_name: auth0User.name || 'Auth0 User',
+      });
+      await this.usersRepo.save(user);
     }
 
-    //Fechas
-    const currentDate = new Date();
-    const futureDate = new Date(currentDate);
-    futureDate.setDate(currentDate.getDate() + plan.duration_days);
+    const company = user.company || null;
+    const roleName = user.role?.name || 'USER';
 
-    //Registar en la DB una nueva Suscripcion
-    const newSuscripcion = new Suscripcion();
-    newSuscripcion.company = companySaved;
-    newSuscripcion.plan = plan;
-    newSuscripcion.start_date = currentDate;
-    newSuscripcion.end_date = futureDate;
-
-    await this.suscriptionsRepository.save(newSuscripcion);
-
-    //Encontral el Rol en la DB
-    const rol = await this.rolesRepository.findOne({
-      where: { name: Role.COMPANY_OWNER }
-    });
-
-    if (!rol) {
-      throw new NotFoundException('Error, rol is not valid.');
-    }
-
-    //Registar al usuario en la DB
-    const userFound = await this.usersRepository.findOne({
-      where: { email: newRegister.email }
-    });
-
-    if (userFound) {
-      throw new ConflictException('Email already exist.');
-    }
-
-    const newUser = new User();
-    newUser.email = newRegister.email;
-    newUser.first_name = newRegister.name;
-    newUser.role = rol;
-    newUser.company = companySaved;
-    newUser.created_at = currentDate;
-    newUser.updated_at = currentDate;
-
-    await this.usersRepository.save(newUser);
-
-    return {
-      message: 'Register successfully.'
+    // 4️⃣ Generar JWT local
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      companyId: company?.id || null,
+      roles: [roleName],
     };
+
+    const token = this.jwtService.sign(payload);
+    return token;
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePlanDto } from './dto/create-plan.dto';
@@ -18,66 +18,46 @@ export class PlanService {
     const plan = this.planRepository.create(createPlanDto);
     const savedPlan = await this.planRepository.save(plan);
 
-    return {
-      id: savedPlan.id,
-      name: savedPlan.name,
-      price: savedPlan.price,
-      duration_days: savedPlan.duration_days,
-      createdAt: savedPlan.createdAt,
-      updatedAt: savedPlan.updatedAt
-    };
+    return this.toDto(savedPlan);
   }
 
   async findAll(): Promise<PlanResponseDto[]> {
     const plans = await this.planRepository.find({
-      order: { createdAt: 'DESC' }
+      order: { createdAt: 'DESC' },
     });
 
-    return plans.map((plan) => ({
-      id: plan.id,
-      name: plan.name,
-      price: plan.price,
-      duration_days: plan.duration_days,
-      createdAt: plan.createdAt,
-      updatedAt: plan.updatedAt
-    }));
+    return plans.map(this.toDto);
   }
 
   async seeder() {
-    //Leer data y guardarla en la DB
     await this.planRepository.upsert(plans_data, ['name']);
-
     return { message: 'Plans added successfully.' };
   }
 
   async findOne(id: string): Promise<PlanResponseDto> {
-    const plan = await this.planRepository.findOne({
-      where: { id }
-    });
+    const plan = await this.planRepository.findOne({ where: { id } });
+    if (!plan) throw new NotFoundException('Plan no encontrado');
+    return this.toDto(plan);
+  }
 
-    if (!plan) {
-      throw new Error('Plan no encontrado');
-    }
+  async update(id: string, updatePlanDto: UpdatePlanDto): Promise<PlanResponseDto> {
+    const plan = await this.findOne(id); // lanzará NotFoundException si no existe
+    Object.assign(plan, updatePlanDto);
+    return this.toDto(await this.planRepository.save(plan));
+  }
 
+  async remove(id: string): Promise<void> {
+    await this.planRepository.softDelete(id);
+  }
+
+  private toDto(plan: Plan): PlanResponseDto {
     return {
       id: plan.id,
       name: plan.name,
       price: plan.price,
       duration_days: plan.duration_days,
       createdAt: plan.createdAt,
-      updatedAt: plan.updatedAt
+      updatedAt: plan.updatedAt,
     };
-  }
-
-  async update(
-    id: string,
-    updatePlanDto: UpdatePlanDto
-  ): Promise<PlanResponseDto> {
-    await this.planRepository.update(id, updatePlanDto);
-    return this.findOne(id);
-  }
-
-  async remove(id: string): Promise<void> {
-    await this.planRepository.softDelete(id);
   }
 }

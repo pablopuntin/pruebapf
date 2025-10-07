@@ -1,0 +1,10 @@
+{
+  "sub": "uuid-user-id",
+  "email": "admin@empresa.com",
+  "companyId": "uuid-company-id",
+  "subscriptionId": "uuid-subscription-id",
+  "planId": "uuid-plan-id",
+  "roles": ["COMPANY_OWNER"],
+  "iat": 1728349200,
+  "exp": 1728352800
+}

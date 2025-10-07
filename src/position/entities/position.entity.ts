@@ -5,10 +5,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-  OneToMany
+  OneToMany,
+  ManyToOne,
+  JoinColumn
 } from 'typeorm';
 
 import { Employee } from 'src/empleado/entities/empleado.entity';
+import { Departamento } from 'src/departamento/entities/departamento.entity';
 
 @Entity('positions')
 export class Position {
@@ -44,4 +47,8 @@ export class Position {
 
   @OneToMany(() => Employee, (employee) => employee.position)
   employees: Employee[];
+
+  @ManyToOne(() => Departamento, (departamento) => departamento.positions, { eager: true })
+  @JoinColumn({ name: 'departamento_id' })
+  departamento: Departamento;
 }

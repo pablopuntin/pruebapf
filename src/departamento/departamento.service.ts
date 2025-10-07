@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateDepartamentoDto } from './dto/create-departamento.dto';
 import { UpdateDepartamentoDto } from './dto/update-departamento.dto';
 import { Departamento } from './entities/departamento.entity';
+import { DEPARTAMENTOS_BASE } from './data/departamento.data';
 
 @Injectable()
 export class DepartamentoService {
@@ -50,4 +51,22 @@ export class DepartamentoService {
   async remove(id: string): Promise<void> {
     await this.departamentoRepository.softDelete(id);
   }
+
+  async seedDepartamentos(): Promise<void> {
+    for (const depData of DEPARTAMENTOS_BASE) {
+      const existing = await this.departamentoRepo.findOne({
+        where: { nombre: ILike(depData.nombre) }, // 👈 case-insensitive
+      });
+      if (!existing) {
+        const nuevo = this.departamentoRepo.create(depData);
+        await this.departamentoRepo.save(nuevo);
+      }
+    }
+    console.log('✅ Departamentos precargados correctamente');
+  }
+
+  async findByName(nombre: string): Promise<Departamento | null> {
+    return this.departamentoRepo.findOne({ where: { nombre: ILike(nombre) } });
+  }
+
 }

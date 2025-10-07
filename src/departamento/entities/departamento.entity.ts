@@ -8,6 +8,7 @@ import {
   OneToMany
 } from 'typeorm';
 import { Employee } from 'src/empleado/entities/empleado.entity';
+import { Position } from 'src/position/entities/position.entity';
 
 @Entity('departamentos')
 export class Departamento {
@@ -43,4 +44,7 @@ export class Departamento {
 
   @OneToMany(() => Employee, (employee) => employee.department)
   employees: Employee[];
+
+  @OneToMany(() => Position, (position) => position.departamento)
+  positions: Position[];
 }

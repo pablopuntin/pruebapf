@@ -49,11 +49,12 @@ export class Company {
   update_at: Date;
 
   @DeleteDateColumn({
-    name: 'fecha_deleted',
-    type: 'timestamp',
-    nullable: true
-  })
-  deletedAt?: Date | null;
+  name: 'fecha_eliminacion',
+  type: 'timestamp',
+  nullable: true
+})
+deleted_at?: Date | null;
+
 
   @OneToMany(() => Employee, (employee) => employee.company)
   employees: Employee[];
