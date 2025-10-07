@@ -43,9 +43,12 @@ export class AbsenceService {
     return absence;
   }
 
-  async update(id: string, updateAbsenceDto: UpdateAbsenceDto): Promise<Absence> {
+  async update(
+    id: string,
+    updateAbsenceDto: UpdateAbsenceDto
+  ): Promise<Absence> {
     const absence = await this.findOne(id);
-    
+
     Object.assign(absence, updateAbsenceDto);
     return await this.absenceRepository.save(absence);
   }

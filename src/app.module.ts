@@ -53,7 +53,6 @@ import { Rol } from './rol/entities/rol.entity';
     AbsenceModule,
     ContactModule,
     TypeOrmModule.forFeature([Plan, Rol])
-    // ...otros módulos
   ],
   controllers: [AppController],
   providers: [AppService, PlanService, RolService]
