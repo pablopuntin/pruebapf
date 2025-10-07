@@ -163,7 +163,8 @@ export class AuthService {
     res.cookie('app_token', appToken, {
       httpOnly: false, // ⚠️ accesible desde el frontend
       secure: true,
-      sameSite: 'lax'
+      sameSite: 'lax',
+      domain: 'front-git-main-hr-systems-projects.vercel.app'
     });
 
     return appToken; // opcional si lo quieres usar
