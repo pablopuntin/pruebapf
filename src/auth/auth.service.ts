@@ -36,12 +36,25 @@ export class AuthService {
       relations: ['company', 'role'],
     });
 
-    // 3️⃣ Si no existe, opcionalmente crearlo (depende de tu lógica)
+    // 3️⃣ Si no existe, crearlo con rol por defecto
     if (!user) {
+      const defaultRole = await this.rolesRepo.findOne({
+        where: { name: 'USER' },
+      });
+
+      if (!defaultRole) {
+        throw new UnauthorizedException(
+          'Default role "USER" not found. Please seed roles in DB.',
+        );
+      }
+
       user = this.usersRepo.create({
         email: auth0User.email,
         first_name: auth0User.name || 'Auth0 User',
+        role: defaultRole, // ✅ TypeScript seguro
+        company: null,
       });
+
       await this.usersRepo.save(user);
     }
 
@@ -56,7 +69,7 @@ export class AuthService {
       roles: [roleName],
     };
 
-    const token = this.jwtService.sign(payload);
-    return token;
+    // 🔹 Expiración explícita de 15 minutos
+    return this.jwtService.sign(payload, { expiresIn: '15m' });
   }
 }

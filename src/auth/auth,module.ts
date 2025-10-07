@@ -15,11 +15,11 @@ import { Rol } from 'src/rol/entities/rol.entity';
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'supersecretkey', // usa variable de entorno
-      signOptions: { expiresIn: '15m' },
-    }),
+      signOptions: { expiresIn: '15m' }
+    })
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
-  exports: [AuthService],
+  exports: [AuthService]
 })
 export class AuthModule {}
