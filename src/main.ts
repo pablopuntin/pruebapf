@@ -9,27 +9,6 @@ import { auth } from 'express-openid-connect';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  //-----Configuracion de Auth0------//
-  app.use(auth(auth0Config));
-
-  const server = app.getHttpAdapter().getInstance();
-
-  //Borra la cookie local y hace logout en Auth0
-  server.get('/logout', (req, res) => {
-    res.oidc.logout({
-      returnTo: 'https://front-git-main-hr-systems-projects.vercel.app'
-    });
-  });
-
-  // Activar validación global
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true, // elimina propiedades no declaradas en el DTO
-      forbidNonWhitelisted: true, // lanza error si llegan propiedades extra
-      transform: true // transforma tipos automáticamente (ej: string -> number)
-    })
-  );
-
   app.enableCors({
     origin: [
       'https://front-one-umber.vercel.app',
@@ -39,6 +18,18 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true
   });
+
+  //-----Configuracion de Auth0------//
+  app.use(auth(auth0Config));
+
+  // Activar validación global
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // elimina propiedades no declaradas en el DTO
+      forbidNonWhitelisted: true, // lanza error si llegan propiedades extra
+      transform: true // transforma tipos automáticamente (ej: string -> number)
+    })
+  );
 
   const configService = app.get(ConfigService);
 

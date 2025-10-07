@@ -10,31 +10,30 @@ export class ContactService {
 
   constructor(private configService: ConfigService) {
     sgMail.setApiKey(this.configService.get<string>('SENDGRID_API_KEY')!);
-this.fromEmail = this.configService.get<string>('SENDGRID_FROM')!;
-
+    this.fromEmail = this.configService.get<string>('SENDGRID_FROM')!;
   }
 
   async sendContactEmail(
-    contactData: ContactFormDto,
+    contactData: ContactFormDto
   ): Promise<{ success: boolean; message: string }> {
     try {
       await sgMail.send(this.createAdminEmail(contactData));
       await sgMail.send(this.createUserEmail(contactData));
 
       this.logger.log(
-        `Email de contacto enviado desde: ${contactData.correoElectronico}`,
+        `Email de contacto enviado desde: ${contactData.correoElectronico}`
       );
 
       return {
         success: true,
         message:
-          'Mensaje enviado exitosamente. Te responderemos en menos de 24 horas.',
+          'Mensaje enviado exitosamente. Te responderemos en menos de 24 horas.'
       };
     } catch (error) {
       this.logger.error('Error al enviar email de contacto:', error);
       return {
         success: false,
-        message: 'Error al enviar el mensaje. Por favor, intenta nuevamente.',
+        message: 'Error al enviar el mensaje. Por favor, intenta nuevamente.'
       };
     }
   }
