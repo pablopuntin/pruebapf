@@ -10,9 +10,7 @@ export class AuthController {
   // Login manual → redirige a Auth0
   @Get('/login')
   login(@Req() req: Request, @Res() res: Response) {
-    res.oidc.login({
-      returnTo: '/callback'
-    });
+    res.oidc.login();
   }
 
   // Callback → Auth0 ya emitió la cookie, redirige al frontend
