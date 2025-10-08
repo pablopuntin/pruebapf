@@ -29,9 +29,11 @@ export class AuthController {
 
     const appToken = await this.authService.generateAppToken(user);
 
+    console.log('Redirecting to frontend with token:', appToken);
+
     // redirigimos al frontend
     return res.redirect(
-      `https://front-git-main-hr-systems-projects.vercel.app/privacidad#token=${appToken}`
+      `https://front-git-main-hr-systems-projects.vercel.app/dashboard#token=${appToken}`
     );
   }
 
