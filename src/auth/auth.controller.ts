@@ -19,34 +19,28 @@ export class AuthController {
   @Get('/callback')
   async callback(@Req() req: Request, @Res() res: Response) {
     try {
-      // Esto procesa la respuesta de Auth0, intercambia el código,
-      // establece la sesión/cookie y POPULA req.oidc.user.
-      await res.oidc.callback();
-      // Nota: Si necesitas opciones como 'redirectUri', puedes pasarlas:
-      // await res.oidc.callback({ redirectUri: 'https://back-8cv1.onrender.com/callback' });
+      const user = req.oidc?.user;
+
+      if (!user) {
+        return res.redirect(
+          'https://front-git-main-hr-systems-projects.vercel.app'
+        );
+      }
+
+      const appToken = await this.authService.generateAppToken(user);
+
+      console.log('Redirecting to frontend with token:', appToken);
+
+      // redirigimos al frontend
+      return res.redirect(
+        `https://front-git-main-hr-systems-projects.vercel.app/dashboard?token=${appToken}`
+      );
     } catch (error) {
       console.error('Error durante el callback de Auth0:', error);
       return res.redirect(
         'https://front-git-main-hr-systems-projects.vercel.app/?error=auth_failed'
       );
     }
-
-    const user = req.oidc?.user;
-
-    if (!user) {
-      return res.redirect(
-        'https://front-git-main-hr-systems-projects.vercel.app'
-      );
-    }
-
-    const appToken = await this.authService.generateAppToken(user);
-
-    console.log('Redirecting to frontend with token:', appToken);
-
-    // redirigimos al frontend
-    return res.redirect(
-      `https://front-git-main-hr-systems-projects.vercel.app/dashboard?token=${appToken}`
-    );
   }
 
   // logout manual → elimina cookie + cierra sesión en Auth0 + redirige al frontend
