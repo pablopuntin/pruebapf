@@ -17,6 +17,7 @@ export class AuthController {
   @Get('/callback')
   async callback(@Req() req: Request, @Res() res: Response) {
     try {
+      await res.oidc.callback();
       const user = req.oidc?.user;
 
       if (!user) {

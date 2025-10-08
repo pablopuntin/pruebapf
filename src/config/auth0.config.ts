@@ -19,7 +19,7 @@ export const config: ConfigParams = {
   routes: {
     login: false, // ❌ desactivamos login automático
     logout: false, // ❌ desactivamos logout automático
-    callback: '/callback' // ruta a la que Auth0 redirige después de login
+    callback: false // ruta a la que Auth0 redirige después de login
   },
   idpLogout: true, // al hacer logout también se borra la sesión en Auth0
   authorizationParams: {
