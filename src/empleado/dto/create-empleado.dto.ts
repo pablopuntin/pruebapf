@@ -7,19 +7,32 @@ import {
   IsDateString,
   IsNumber,
   IsEmail,
-  IsUUID
+  IsUUID,
+  MaxLength,
+  IsUrl,
+  Matches
 } from 'class-validator';
 import { MaxTwoDecimals } from 'src/validators/max-two-decimals.validator';
 
 export class CreateEmployeeDto {
-  @ApiProperty({ example: 'Juan', description: 'Nombre del empleado' })
+  @ApiProperty({
+    example: 'Juan',
+    description: 'Nombre del empleado',
+    maxLength: 50
+  })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(50)
   first_name: string;
 
-  @ApiProperty({ example: 'Pérez', description: 'Apellido del empleado' })
+  @ApiProperty({
+    example: 'Pérez',
+    description: 'Apellido del empleado',
+    maxLength: 50
+  })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(50)
   last_name: string;
 
   @ApiProperty({ example: 12345679, description: 'DNI único del empleado' })
@@ -27,19 +40,43 @@ export class CreateEmployeeDto {
   @IsOptional()
   dni?: number;
 
-  @ApiProperty({ example: '20-12345678-9', description: 'CUIL único del empleado' })
+  @ApiProperty({
+    example: '20-12345678-9',
+    description: 'CUIL único del empleado (formato: XX-XXXXXXXX-X)',
+    maxLength: 13
+  })
   @IsString()
   @IsOptional()
+  @MaxLength(13)
+  @Matches(/^\d{2}-\d{8}-\d{1}$/, {
+    message: 'El CUIL debe tener el formato XX-XXXXXXXX-X'
+  })
   cuil?: string;
 
-  @ApiProperty({ example: '+54 9 11 1234-5678', required: false })
+  @ApiProperty({
+    example: '+54 9 11 1234-5678',
+    description: 'Número de teléfono del empleado',
+    maxLength: 20,
+    required: false
+  })
   @IsOptional()
   @IsString()
+  @MaxLength(20)
+  @Matches(/^\+?[\d\s\-\(\)]+$/, {
+    message:
+      'El teléfono debe contener solo números, espacios, guiones y paréntesis'
+  })
   phone_number?: string;
 
-  @ApiProperty({ example: 'Av. Siempre Viva 123', required: false })
+  @ApiProperty({
+    example: 'Av. Siempre Viva 123, CABA, Argentina',
+    description: 'Dirección completa del empleado',
+    maxLength: 255,
+    required: false
+  })
   @IsOptional()
   @IsString()
+  @MaxLength(255)
   address?: string;
 
   @ApiProperty({
@@ -52,9 +89,17 @@ export class CreateEmployeeDto {
   @IsDateString()
   birthdate?: Date;
 
-  @ApiProperty({ example: 'https://cdn.com/empleado.png', required: false })
+  @ApiProperty({
+    example: 'https://cdn.com/empleado.png',
+    description: 'URL de la imagen del empleado',
+    format: 'url',
+    maxLength: 255,
+    required: false
+  })
   @IsOptional()
   @IsString()
+  @IsUrl()
+  @MaxLength(255)
   imgUrl?: string;
 
   @ApiProperty({
@@ -71,10 +116,13 @@ export class CreateEmployeeDto {
 
   @ApiProperty({
     example: 'juan.perez@email.com',
-    description: 'Correo electrónico del empleado'
+    description: 'Correo electrónico del empleado',
+    format: 'email',
+    maxLength: 100
   })
   @IsEmail()
   @IsOptional()
+  @MaxLength(100)
   email: string;
 
   // 🚀 Nuevos campos opcionales para relaciones
