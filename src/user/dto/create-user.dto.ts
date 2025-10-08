@@ -29,7 +29,7 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   @IsUUID()
-  employee_id?: string;
+  employee_id: string | null;
 
   @ApiPropertyOptional({
     example: '123e4567-e89b-12d3-a456-426614174000',
@@ -39,7 +39,7 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   @IsUUID()
-  company_id?: string;
+  company_id: string | null;
 
   @ApiProperty({
     example: 'usuario@empresa.com',
@@ -92,5 +92,5 @@ export class CreateUserDto {
   @IsString()
   @IsUrl()
   @MaxLength(255)
-  profile_image_url?: string;
+  profile_image_url: string | null;
 }
