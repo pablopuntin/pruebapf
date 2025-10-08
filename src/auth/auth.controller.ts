@@ -31,7 +31,7 @@ export class AuthController {
 
     // redirigimos al frontend
     return res.redirect(
-      `https://front-git-main-hr-systems-projects.vercel.app/dashboard#token=${appToken}`
+      `https://front-git-main-hr-systems-projects.vercel.app/privacidad#token=${appToken}`
     );
   }
 
