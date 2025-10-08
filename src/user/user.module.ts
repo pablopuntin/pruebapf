@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import { Rol } from 'src/rol/entities/rol.entity';
 import { Company } from 'src/empresa/entities/empresa.entity';
 import { Employee } from 'src/empleado/entities/empleado.entity';
+import { AuthService } from 'src/auth/auth.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Rol, Company, Employee])],
