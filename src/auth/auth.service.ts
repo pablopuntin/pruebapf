@@ -164,9 +164,34 @@ export class AuthService {
       httpOnly: false, // ⚠️ accesible desde el frontend
       secure: true,
       sameSite: 'none',
+      path: '/',
       domain: 'front-git-main-hr-systems-projects.vercel.app'
     });
 
     return appToken; // opcional si lo quieres usar
+  }
+
+  //-------------Perfil de usuario y JWT-------------//
+  async getUserWithJwt(email: string) {
+    const userLogin = await this.usersRepository.findOne({
+      where: { email },
+      relations: { company: true, role: true }
+    });
+
+    if (!userLogin) {
+      throw new NotFoundException('User not found in DB.');
+    }
+
+    const payload = {
+      id: userLogin.id,
+      email: userLogin.email,
+      name: userLogin.first_name,
+      rol: userLogin.role.name,
+      companyId: userLogin.company.id
+    };
+
+    const appToken = this.jwtService.sign(payload);
+
+    return { user: userLogin, appToken };
   }
 }
