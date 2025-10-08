@@ -36,7 +36,7 @@ export const config: ConfigParams = {
 
       // 'none' es esencial para que la cookie se envíe de vuelta a tu backend
       // después de la redirección de Auth0.
-      sameSite: isProduction ? 'none' : 'lax'
+      sameSite: isProduction ? 'None' : 'Lax'
     }
   }
   /*
