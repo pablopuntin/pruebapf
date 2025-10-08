@@ -34,7 +34,7 @@ async create(createEmployeeDto: CreateEmployeeDto, user: User): Promise<Employee
   try {
    const employee = this.employeeRepository.create({
       ...createEmployeeDto,
-      //company: user.company, // multi-tenant seguro
+      company: user.company, // multi-tenant seguro
       user: user,            // relación uno a uno con el user autenticado
     });
 
@@ -44,8 +44,6 @@ async create(createEmployeeDto: CreateEmployeeDto, user: User): Promise<Employee
   }
 }
 
-
-  
   async findAll(): Promise<(Employee & { age?: number })[]> {
   const employees = await this.employeeRepository.find();
   return employees.map(emp => ({
