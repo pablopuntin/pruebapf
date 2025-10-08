@@ -6,11 +6,13 @@ import {
   AUTH0_CLIENTSECRET
 } from './auth0.envs';
 
+console.log(AUTH0_BASEURL);
+
 export const config: ConfigParams = {
   authRequired: false,
   auth0Logout: true,
   secret: AUTH0_SECRET,
-  baseURL: AUTH0_BASEURL ?? 'http://localhost:3000',
+  baseURL: AUTH0_BASEURL,
   clientID: AUTH0_CLIENTID,
   clientSecret: AUTH0_CLIENTSECRET,
   issuerBaseURL: 'https://dev-hrsystem.us.auth0.com',
