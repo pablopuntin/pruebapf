@@ -18,6 +18,19 @@ export class AuthController {
   // Callback → Auth0 ya emitió la cookie, redirige al frontend
   @Get('/callback')
   async callback(@Req() req: Request, @Res() res: Response) {
+    try {
+      // Esto procesa la respuesta de Auth0, intercambia el código,
+      // establece la sesión/cookie y POPULA req.oidc.user.
+      await res.oidc.callback();
+      // Nota: Si necesitas opciones como 'redirectUri', puedes pasarlas:
+      // await res.oidc.callback({ redirectUri: 'https://back-8cv1.onrender.com/callback' });
+    } catch (error) {
+      console.error('Error durante el callback de Auth0:', error);
+      return res.redirect(
+        'https://front-git-main-hr-systems-projects.vercel.app/?error=auth_failed'
+      );
+    }
+
     const user = req.oidc?.user;
 
     if (!user) {
