@@ -65,6 +65,23 @@ export class PositionController {
     return this.positionService.findAll();
   }
 
+  @Get('seeder')
+  @ApiOperation({
+    summary: 'Ejecutar seeder de puestos de empleados',
+    description: 'Carga puestos de empleados predefinidos en el sistema'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Seeder ejecutado exitosamente'
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor'
+  })
+  seeder() {
+    return this.positionService.seeder();
+  }
+
   @Get(':id')
   @ApiOperation({
     summary: 'Obtener puesto por ID',

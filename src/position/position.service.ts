@@ -5,6 +5,7 @@ import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
 import { PositionResponseDto } from './dto/position-response.dto';
 import { Position } from './entities/position.entity';
+import { positions_data } from './data/position.data';
 
 @Injectable()
 export class PositionService {
@@ -40,6 +41,13 @@ export class PositionService {
       createdAt: position.createdAt,
       updatedAt: position.updatedAt
     }));
+  }
+
+  async seeder() {
+    //Leer data y guardarla en la DB
+    await this.positionRepository.upsert(positions_data, ['name']);
+
+    return { message: 'Positions seeded successfully.' };
   }
 
   async findOne(id: string): Promise<PositionResponseDto> {

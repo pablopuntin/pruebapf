@@ -23,8 +23,12 @@ import { JWT_SECRET } from './config/auth0.envs';
 import { AppService } from './app.service';
 import { PlanService } from './plan/plan.service';
 import { RolService } from './rol/rol.service';
+import { DepartamentoService } from './departamento/departamento.service';
+import { PositionService } from './position/position.service';
 import { Plan } from './plan/entities/plan.entity';
 import { Rol } from './rol/entities/rol.entity';
+import { Departamento } from './departamento/entities/departamento.entity';
+import { Position } from './position/entities/position.entity';
 
 @Module({
   imports: [
@@ -52,9 +56,15 @@ import { Rol } from './rol/entities/rol.entity';
     UserModule,
     AbsenceModule,
     ContactModule,
-    TypeOrmModule.forFeature([Plan, Rol])
+    TypeOrmModule.forFeature([Plan, Rol, Departamento, Position])
   ],
   controllers: [AppController],
-  providers: [AppService, PlanService, RolService]
+  providers: [
+    AppService,
+    PlanService,
+    RolService,
+    DepartamentoService,
+    PositionService
+  ]
 })
 export class AppModule {}

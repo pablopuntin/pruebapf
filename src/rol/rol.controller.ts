@@ -68,7 +68,7 @@ export class RolController {
   @Get('seeder')
   @ApiOperation({
     summary: 'Ejecutar seeder de roles',
-    description: 'Carga roles predefinidos en el sistema (desarrollo)'
+    description: 'Carga roles predefinidos en el sistema'
   })
   @ApiResponse({
     status: 200,

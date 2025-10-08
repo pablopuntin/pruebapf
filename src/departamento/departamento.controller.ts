@@ -65,6 +65,23 @@ export class DepartamentoController {
     return this.departamentoService.findAll();
   }
 
+  @Get('seeder')
+  @ApiOperation({
+    summary: 'Ejecutar seeder de departamentos/categorías',
+    description: 'Carga departamentos predefinidos en el sistema'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Seeder ejecutado exitosamente'
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor'
+  })
+  seeder() {
+    return this.departamentoService.seeder();
+  }
+
   @Get(':id')
   @ApiOperation({
     summary: 'Obtener departamento por ID',
