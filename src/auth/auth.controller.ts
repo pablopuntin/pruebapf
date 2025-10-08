@@ -1,7 +1,16 @@
-import { Controller, Post, Body, Get, Req, Res } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Req,
+  Res,
+  UseGuards
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateRegisterDto } from './dto/create-register.dto';
 import type { Request, Response } from 'express';
+import { Auth0DbGuard } from './guards/auth0db.guard';
 
 @Controller()
 export class AuthController {
@@ -43,6 +52,7 @@ export class AuthController {
     });
   }
 
+  @UseGuards(Auth0DbGuard)
   @Get('auth/me')
   async getProfile(@Req() req: Request, @Res() res: Response) {
     if (!req.oidc?.isAuthenticated()) {
