@@ -11,8 +11,7 @@ export class AuthController {
   @Get('/login')
   login(@Req() req: Request, @Res() res: Response) {
     res.oidc.login({
-      returnTo:
-        'https://front-git-main-hr-systems-projects.vercel.app/dashboard'
+      returnTo: '/callback'
     });
   }
 
