@@ -1,61 +1,79 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
   IsNotEmpty,
   IsOptional,
-  IsEmail
+  IsEmail,
+  MaxLength,
+  IsUrl,
+  Matches
 } from 'class-validator';
 
 export class CreateCompanyDto {
   @ApiProperty({
     example: 'Tech Solutions',
-    description: 'Nombre de la empresa'
+    description: 'Nombre comercial de la empresa',
+    maxLength: 100
   })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(100)
   trade_name: string;
 
   @ApiProperty({
     example: 'Tech Solutions S.A.',
-    description: 'Razón social única de la empresa'
+    description: 'Razón social única de la empresa',
+    maxLength: 100
   })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(100)
   legal_name: string;
 
-  @ApiProperty({
-    example: 'Av. Siempre Viva 123',
-    description: 'Dirección de la empresa',
-    required: false
+  @ApiPropertyOptional({
+    example: 'Av. Siempre Viva 123, CABA, Argentina',
+    description: 'Dirección completa de la empresa',
+    maxLength: 255
   })
   @IsOptional()
   @IsString()
+  @MaxLength(255)
   address?: string;
 
-  @ApiProperty({
-    example: '555123456',
+  @ApiPropertyOptional({
+    example: '+54 11 1234-5678',
     description: 'Número de teléfono de la empresa',
-    required: false
+    maxLength: 20
   })
   @IsOptional()
   @IsString()
+  @MaxLength(20)
+  @Matches(/^\+?[\d\s\-\(\)]+$/, {
+    message:
+      'El teléfono debe contener solo números, espacios, guiones y paréntesis'
+  })
   phone_number?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'contacto@techsolutions.com',
     description: 'Correo electrónico de la empresa',
-    required: false
+    format: 'email',
+    maxLength: 100
   })
   @IsOptional()
   @IsEmail()
+  @MaxLength(100)
   email?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'https://cdn.com/logo.png',
-    description: 'Logo de la empresa (URL)',
-    required: false
+    description: 'URL del logo de la empresa',
+    format: 'url',
+    maxLength: 255
   })
   @IsOptional()
   @IsString()
+  @IsUrl()
+  @MaxLength(255)
   logo?: string;
 }

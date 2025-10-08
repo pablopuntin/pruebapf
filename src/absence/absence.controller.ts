@@ -12,7 +12,7 @@ import { AbsenceService } from './absence.service';
 import { CreateAbsenceDto } from './dto/create-absence.dto';
 import { UpdateAbsenceDto } from './dto/update-absence.dto';
 
-@ApiTags('Absence - Control de Asistencias')
+@ApiTags('Absence')
 @Controller('absence')
 export class AbsenceController {
   constructor(private readonly absenceService: AbsenceService) {}
