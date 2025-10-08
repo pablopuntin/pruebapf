@@ -137,7 +137,7 @@ export class AuthService {
 
   //-------------Generar Token para cookie-------------//
 
-  async generateAppToken(user: any) {
+  async generateAppToken(user: any, res: Response) {
     const userLogin = await this.usersRepository.findOne({
       where: { email: user.email },
       relations: { company: true, role: true }
@@ -150,7 +150,7 @@ export class AuthService {
     const { id, email, first_name, role, company, ...props } = userLogin;
 
     // Token JWT
-    return this.jwtService.sign({
+    const appToken = this.jwtService.sign({
       sub: user.sub,
       id: id,
       email: email,
@@ -158,5 +158,15 @@ export class AuthService {
       rol: role.name,
       companyId: company.id
     });
+
+    // Setear cookie
+    res.cookie('app_token', appToken, {
+      httpOnly: false, // ⚠️ accesible desde el frontend
+      secure: true,
+      sameSite: 'none',
+      domain: 'front-git-main-hr-systems-projects.vercel.app'
+    });
+
+    return appToken; // opcional si lo quieres usar
   }
 }
