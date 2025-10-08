@@ -30,7 +30,7 @@ export class DepartamentoService {
 
   async seeder() {
     //Leer data y guardarla en la DB
-    await this.departamentoRepository.upsert(departments_data, ['name']);
+    await this.departamentoRepository.upsert(departments_data, ['nombre']);
 
     return { message: 'Departments seeded successfully.' };
   }
