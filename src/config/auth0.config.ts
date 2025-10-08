@@ -21,7 +21,7 @@ export const config: ConfigParams = {
   },
   idpLogout: true, // al hacer logout también se borra la sesión en Auth0
   authorizationParams: {
-    response_type: 'code',
+    response_type: 'code id_token',
     scope: 'openid profile email'
   }
   /*
