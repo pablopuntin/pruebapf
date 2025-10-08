@@ -19,12 +19,7 @@ import { Request } from '@nestjs/common';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-// @Post()
-// async create(@Body() createUserDto: CreateUserDto, @Req() req: Request) {
-//   // Asumiendo que el usuario autenticado está en req.user
-//   const authUser = req.user; 
-//    return this.userService.create(createUserDto, authUser);
-// }
+
 
 @Post()
 async create(@Body() dto: CreateUserDto, @Req() req: any) {
