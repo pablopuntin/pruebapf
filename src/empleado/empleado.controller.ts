@@ -6,7 +6,9 @@ import {
   Patch,
   Param,
   Delete,
-  Req
+  Req,
+  Query,
+  UseGuards
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,6 +21,9 @@ import { EmpleadoService } from './empleado.service';
 import { CreateEmployeeDto } from './dto/create-empleado.dto';
 import { UpdateEmployeeDto } from './dto/update-empleado.dto';
 import { SearchEmpleadoDto } from './dto/search-empleado.dto';
+import { Request } from '@nestjs/common';
+import { User } from 'src/user/entities/user.entity';
+import { AuthUser } from 'src/decoradores/aut-user.decoratos';
 
 @ApiTags('Empleado')
 @Controller('empleado')
@@ -51,9 +56,18 @@ export class EmpleadoController {
     status: 500,
     description: 'Error interno del servidor'
   })
-  create(@Body() createEmployeeDto: CreateEmployeeDto, @Req() req: any) {
-    const user = req.user; // viene del JWT
-    return this.empleadoService.create(createEmployeeDto, user);
+  
+  // async create(@Body() createEmployeeDto: CreateEmployeeDto, @Req() req: Request) {
+  //   const authUser = req.user as User;
+  //   return this.empleadoService.create(createEmployeeDto, authUser);
+  // }
+
+  //CON DECORADOR
+   async create(
+    @AuthUser() user: any,
+    @Body() dto: CreateEmployeeDto
+  ) {
+    return this.empleadoService.create(dto, user);
   }
 
   @Get()
@@ -70,9 +84,10 @@ export class EmpleadoController {
     status: 500,
     description: 'Error interno del servidor'
   })
-  findAll() {
-    return this.empleadoService.findAll();
+  async findAll(@AuthUser() user: any) {
+    return this.empleadoService.findAll(user);
   }
+   
 
   @Get(':id')
   @ApiOperation({
@@ -97,11 +112,11 @@ export class EmpleadoController {
     status: 400,
     description: 'ID inválido'
   })
-  findOne(@Param('id') id: string) {
-    return this.empleadoService.findOne(id);
+   async findOne(@Param('id') id: string, @AuthUser() user: any) {
+    return this.empleadoService.findOne(id, user);
   }
 
-  @Post('search')
+  @Get('search')
   @ApiOperation({
     summary: 'Buscar empleados',
     description:
@@ -123,8 +138,11 @@ export class EmpleadoController {
     status: 500,
     description: 'Error interno del servidor'
   })
-  search(@Body() searchDto: SearchEmpleadoDto) {
-    return this.empleadoService.search(searchDto);
+    async searchEmpleados(
+    @AuthUser() user: any,
+    @Query() searchDto: SearchEmpleadoDto
+  ) {
+    return this.empleadoService.search(user, searchDto);
   }
 
   @Patch(':id')
@@ -159,11 +177,12 @@ export class EmpleadoController {
     status: 409,
     description: 'El DNI o CUIL ya está registrado por otro empleado'
   })
-  update(
+   async update(
     @Param('id') id: string,
-    @Body() updateEmployeeDto: UpdateEmployeeDto
+    @Body() dto: UpdateEmployeeDto,
+    @AuthUser() user: any
   ) {
-    return this.empleadoService.update(id, updateEmployeeDto);
+    return this.empleadoService.update(id, dto, user);
   }
 
   @Delete(':id')
@@ -189,7 +208,21 @@ export class EmpleadoController {
     status: 400,
     description: 'ID inválido'
   })
-  remove(@Param('id') id: string) {
-    return this.empleadoService.remove(id);
+  async remove(@Param('id') id: string, @AuthUser() user: any) {
+    return this.empleadoService.remove(id, user);
   }
+
+  //ruta de ausencias del empleado
+
+@Get(':id/ausencias')
+async getAusenciasByEmpleado(
+  @Param('id') employeeId: string,
+  @AuthUser() user: User,
+  @Query('month') month?: number,
+  @Query('year') year?: number
+) {
+  return this.empleadoService.getAusenciasByEmpleado(employeeId, user, month, year);
+}
+
+ 
 }
