@@ -7,12 +7,14 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToOne
+  OneToOne,
+  OneToMany
 } from 'typeorm';
 import { Company } from '../../empresa/entities/empresa.entity';
 import { Departamento } from 'src/departamento/entities/departamento.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Position } from 'src/position/entities/position.entity';
+import { Absence } from 'src/absence/entities/absence.entity';
 
 @Entity('employees')
 export class Employee {
@@ -34,6 +36,9 @@ export class Employee {
   @ManyToOne(() => Position, (position) => position.employees)
   @JoinColumn({ name: 'position_id' })
   position: Position;
+
+  @OneToMany(()=> Absence, (absence)=> absence.employee)
+  absences: Absence[];
 
   @Column()
   first_name: string;

@@ -1,4 +1,3 @@
-// src/empleado/empleado.service.ts
 import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -7,141 +6,167 @@ import { CreateEmployeeDto } from './dto/create-empleado.dto';
 import { UpdateEmployeeDto } from './dto/update-empleado.dto';
 import { SearchEmpleadoDto } from './dto/search-empleado.dto';
 import { User } from 'src/user/entities/user.entity';
+import { Absence } from 'src/absence/entities/absence.entity';
 
 @Injectable()
 export class EmpleadoService {
   constructor(
     @InjectRepository(Employee)
-    private readonly employeeRepository: Repository<Employee>
+    private readonly employeeRepository: Repository<Employee>,
   ) {}
 
-  //funcion para calcular edad
+  // ---- Calcular edad ----
   private calculateAge(birthdate: Date): number {
-  const today = new Date();
-  const birth = new Date(birthdate);
-  let age = today.getFullYear() - birth.getFullYear();
-  const m = today.getMonth() - birth.getMonth();
+    if (!birthdate || isNaN(new Date(birthdate).getTime())) return 0;
+    const today = new Date();
+    const birth = new Date(birthdate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
 
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
-    age--;
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+
+    return age;
   }
 
-  return age;
-}
+  // ---- Crear empleado (multi-tenant) ----
+  async create(createEmployeeDto: CreateEmployeeDto, user: User): Promise<Employee> {
+    try {
+      const employee = this.employeeRepository.create({
+        ...createEmployeeDto,
+        company: user.company, // multi-tenant seguro
+        user: user,            // relación uno a uno con el user autenticado
+      });
 
-//   async create(createEmployeeDto: CreateEmployeeDto): Promise<Employee> {
-//   try {
-//   const employee = this.employeeRepository.create(createEmployeeDto);
-//     return await this.employeeRepository.save(employee);
-//   } catch (error) {
-//     // Puedes loguear el error si lo necesitas
-//     console.error('Error al crear empleado:', error);
+      return await this.employeeRepository.save(employee);
+    } catch (error) {
+      throw new InternalServerErrorException('No se pudo crear el empleado');
+    }
+  }
 
-//     // Lanzar una excepción HTTP con un mensaje personalizado
-//   throw new InternalServerErrorException('No se pudo crear el empleado');
-//   }
-// }
+  // ---- Listar todos (multi-tenant + edad dinámica) ----
+  async findAll(authUser: User): Promise<(Employee & { age?: number })[]> {
+    const company = authUser.company;
+    if (!company) {
+      throw new InternalServerErrorException('User has no associated company');
+    }
 
-//tomando user.company de la request 
-async create(createEmployeeDto: CreateEmployeeDto, user: User): Promise<Employee> {
-  try {
-   const employee = this.employeeRepository.create({
-      ...createEmployeeDto,
-      //company: user.company, // multi-tenant seguro
-      user: user,            // relación uno a uno con el user autenticado
+    const employees = await this.employeeRepository.find({
+      where: { company: { id: company.id } },
+      relations: ['company', 'department', 'user'],
     });
 
-    return await this.employeeRepository.save(employee);
-  } catch (error) {
-    throw new InternalServerErrorException('No se pudo crear el empleado');
+    return employees.map(emp => ({
+      ...emp,
+      age: emp.birthdate ? this.calculateAge(emp.birthdate) : undefined,
+    }));
   }
-}
 
+  // ---- Buscar por ID (multi-tenant + edad) ----
+  async findOne(id: string, authUser: User): Promise<Employee & { age?: number }> {
+    const company = authUser.company;
+    if (!company) {
+      throw new InternalServerErrorException('User has no associated company');
+    }
 
-  // async findAll(): Promise<Employee[]> {
-  //   return this.employeeRepository.find();
-  // }
-  //con age dinamico
-  async findAll(): Promise<(Employee & { age?: number })[]> {
-  const employees = await this.employeeRepository.find();
-  return employees.map(emp => ({
-    ...emp,
-    age: emp.birthdate ? this.calculateAge(emp.birthdate) : undefined,
-  }));
-}
+    const employee = await this.employeeRepository.findOne({
+      where: { id, company: { id: company.id } },
+      relations: ['company', 'department', 'user'],
+    });
 
+    if (!employee) throw new NotFoundException(`Empleado con ID ${id} no encontrado`);
 
+    const age = employee.birthdate ? this.calculateAge(employee.birthdate) : undefined;
+    return { ...employee, age };
+  }
 
-  // async findOne(id: string): Promise<Employee> {
-  //   const employee = await this.employeeRepository.findOne({ where: { id } });
-  //   if (!employee) throw new NotFoundException(`Empleado con ID ${id} no encontrado`);
-  //   return employee;
-  // }
+  // ---- Búsqueda dinámica (multi-tenant + edad) ----
+  async search(authUser: User, searchDto: SearchEmpleadoDto): Promise<(Employee & { age?: number })[]> {
+    const company = authUser.company;
+    if (!company) {
+      throw new InternalServerErrorException('User has no associated company');
+    }
 
-  //funcion con edad dinamica
-async findOne(id: string): Promise<Employee & { age?: number }> {
-  const employee = await this.employeeRepository.findOne({ where: { id } });
-  if (!employee) throw new NotFoundException(`Empleado con ID ${id} no encontrado`);
+    const { id, dni, last_name } = searchDto;
+    const where: any = { company: { id: company.id } };
 
-  const age = employee.birthdate ? this.calculateAge(employee.birthdate) : undefined;
+    if (id) where.id = id;
+    if (dni) where.dni = dni;
+    if (last_name) where.last_name = last_name;
 
-  return { ...employee, age };
-}
+    const employees = await this.employeeRepository.find({
+      where,
+      relations: ['company', 'department', 'user'],
+    });
 
-//probando busqueda por id, dni o last_name
-//    async search(searchDto: SearchEmpleadoDto): Promise<Employee[]> {
-//   const { id, dni, last_name } = searchDto;
+    if (!employees || employees.length === 0) {
+      throw new NotFoundException('No se encontraron empleados con esos criterios');
+    }
 
-//   const where: any = {};
+    return employees.map(emp => ({
+      ...emp,
+      age: emp.birthdate ? this.calculateAge(emp.birthdate) : undefined,
+    }));
+  }
 
-//   if (id) where.id = id;
-//   if (dni) where.dni = dni;
-//   if (last_name) where.last_name = last_name;
+  // ---- Actualizar empleado ----
+  async update(id: string, updateEmployeeDto: UpdateEmployeeDto, authUser: User): Promise<Employee> {
+    const company = authUser.company;
+    if (!company) {
+      throw new InternalServerErrorException('User has no associated company');
+    }
 
-//   const employees = await this.employeeRepository.find({
-//     where,
-//     relations: ['company', 'department', 'user'], // ajusta según tu entidad
-//   });
+    await this.employeeRepository.update({ id, company: { id: company.id } }, updateEmployeeDto);
+    return this.findOne(id, authUser);
+  }
 
-//   if (!employees || employees.length === 0) {
-//     throw new NotFoundException('No se encontraron empleados con esos criterios');
-//   }
+  // ---- Eliminado lógico ----
+  async remove(id: string, authUser: User): Promise<void> {
+    const company = authUser.company;
+    if (!company) {
+      throw new InternalServerErrorException('User has no associated company');
+    }
 
-//   return employees;
-// }
-//con age dinamico
-async search(searchDto: SearchEmpleadoDto): Promise<(Employee & { age?: number })[]> {
-  const { id, dni, last_name } = searchDto;
-  const where: any = {};
+    await this.employeeRepository.softDelete({ id, company: { id: company.id } });
+  }
 
-  if (id) where.id = id;
-  if (dni) where.dni = dni;
-  if (last_name) where.last_name = last_name;
+  async getAusenciasByEmpleado(
+  employeeId: string,
+  authUser: User,
+  month?: number,
+  year?: number
+): Promise<Absence[]> {
+  const companyId = authUser.company?.id;
+  if (!companyId) {
+    throw new InternalServerErrorException('User has no associated company');
+  }
 
-  const employees = await this.employeeRepository.find({
-    where,
-    relations: ['company', 'department', 'user'],
+  // Verificamos que el empleado pertenezca a la empresa
+  const empleado = await this.employeeRepository.findOne({
+    where: { id: employeeId, company: { id: companyId } },
+    relations: ['absences'],
   });
 
-  if (!employees || employees.length === 0) {
-    throw new NotFoundException('No se encontraron empleados con esos criterios');
+  if (!empleado) {
+    throw new NotFoundException('Empleado no encontrado en tu empresa');
   }
 
-  return employees.map(emp => ({
-    ...emp,
-    age: emp.birthdate ? this.calculateAge(emp.birthdate) : undefined,
-  }));
+  // Determinar mes y año actual si no se pasan
+  const now = new Date();
+  const targetMonth = month ?? now.getMonth() + 1; // getMonth() es 0-indexed
+  const targetYear = year ?? now.getFullYear();
+
+  // Filtrar ausencias por mes y año
+  const ausenciasFiltradas = empleado.absences.filter((ausencia) => {
+   const fecha = new Date(ausencia.start_date);
+    return (
+      fecha.getMonth() + 1 === targetMonth &&
+      fecha.getFullYear() === targetYear
+    );
+  });
+
+  return ausenciasFiltradas;
 }
-
-  async update(id: string, updateEmployeeDto: UpdateEmployeeDto): Promise<Employee> {
-    await this.employeeRepository.update(id, updateEmployeeDto);
-    return this.findOne(id);
-  }
-
-  async remove(id: string): Promise<void> {
-    await this.employeeRepository.softDelete(id);
-  }
-
-  
 
 }
