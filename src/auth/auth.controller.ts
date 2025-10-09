@@ -52,7 +52,7 @@ export class AuthController {
     });
   }
 
-  @UseGuards(Auth0DbGuard)
+  //@UseGuards(Auth0DbGuard)
   @Get('auth/me')
   async getProfile(@Req() req: Request) {
     // El email viene desde Auth0 session cookie
