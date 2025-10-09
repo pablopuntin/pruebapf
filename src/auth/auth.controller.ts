@@ -54,20 +54,16 @@ export class AuthController {
 
   @UseGuards(Auth0DbGuard)
   @Get('auth/me')
-  async getProfile(@Req() req: Request, @Res() res: Response) {
-    if (!req.oidc?.isAuthenticated()) {
-      return res.status(401).json({ message: 'Not authenticated' });
-    }
-
+  async getProfile(@Req() req: Request) {
     // El email viene desde Auth0 session cookie
-    const email = req.oidc.user?.email;
+    const email = req.oidc?.user?.email;
 
     const { user, appToken } = await this.authService.getUserWithJwt(email);
 
-    return res.json({
+    return {
       user,
       token: appToken // JWT custom
-    });
+    };
   }
 
   @Post('onboarding')
