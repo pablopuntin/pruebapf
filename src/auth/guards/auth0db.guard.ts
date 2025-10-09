@@ -19,18 +19,12 @@ export class Auth0DbGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const httpContext = context.switchToHttp();
-    const req = httpContext.getRequest<Request>();
-    const res = httpContext.getResponse<Response>();
+    const req = context.switchToHttp().getRequest<Request>();
 
-    // 1. Validar con Auth0
-    await new Promise<void>((resolve, reject) => {
-      requiresAuth()(req, res, (err) => {
-        if (err)
-          reject(new UnauthorizedException('Auth0 Authentication failed'));
-        else resolve();
-      });
-    });
+    // ✅ Verificamos si hay sesión sin redirección
+    if (!req.oidc?.isAuthenticated()) {
+      throw new UnauthorizedException('Not authenticated');
+    }
 
     const auth0User = req.oidc?.user;
     if (!auth0User) {
