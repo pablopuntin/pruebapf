@@ -1,5 +1,11 @@
 // src/app.module.ts
-import { Module } from '@nestjs/common';
+import {
+  Module,
+  NestModule,
+  MiddlewareConsumer,
+  RequestMethod
+} from '@nestjs/common';
+import { SameSiteNoneMiddleware } from './middlewares/samesite.middleware';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getTypeOrmConfig } from './config/typeorm.config';
@@ -67,4 +73,10 @@ import { Position } from './position/entities/position.entity';
     PositionService
   ]
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(SameSiteNoneMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL }); // Aplica a todas las rutas
+  }
+}
