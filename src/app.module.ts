@@ -18,6 +18,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { AbsenceModule } from './absence/absence.module';
 import { ContactModule } from './contact/contact.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { JWT_SECRET } from './config/auth0.envs';
 
 //--------------SEEDER----------------//
@@ -57,6 +58,7 @@ import { Position } from './position/entities/position.entity';
     UserModule,
     AbsenceModule,
     ContactModule,
+    NotificationsModule,
     TypeOrmModule.forFeature([Plan, Rol, Departamento, Position])
   ],
   controllers: [AppController],

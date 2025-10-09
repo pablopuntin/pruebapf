@@ -5,6 +5,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm';
@@ -12,6 +13,8 @@ import {
 import { Rol } from 'src/rol/entities/rol.entity';
 import { Company } from 'src/empresa/entities/empresa.entity';
 import { Employee } from 'src/empleado/entities/empleado.entity';
+import { Notification } from '../../notifications/entities/notification.entity';
+import { NotificationConfig } from '../../notifications/entities/notification-config.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -79,4 +82,10 @@ export class User {
     nullable: true
   })
   deleted_at?: Date | null;
+
+  @OneToMany(() => Notification, (notification) => notification.user)
+  notifications: Notification[];
+
+  @OneToMany(() => NotificationConfig, (config) => config.user)
+  notification_configs: NotificationConfig[];
 }
