@@ -23,11 +23,5 @@ export const config: ConfigParams = {
   authorizationParams: {
     response_type: 'code',
     scope: 'openid profile email'
-  },
-  session: {
-    cookie: {
-      sameSite: 'None',
-      secure: true
-    }
   }
 };
