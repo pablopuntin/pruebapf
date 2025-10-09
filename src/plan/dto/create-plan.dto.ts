@@ -4,16 +4,19 @@ import {
   IsNotEmpty,
   IsNumber,
   IsPositive,
-  Min
+  Min,
+  MaxLength
 } from 'class-validator';
 
 export class CreatePlanDto {
   @ApiProperty({
     example: 'Plan Básico',
-    description: 'Nombre del plan'
+    description: 'Nombre del plan',
+    maxLength: 100
   })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(100)
   name: string;
 
   @ApiProperty({
