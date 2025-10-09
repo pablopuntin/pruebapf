@@ -23,5 +23,14 @@ export const config: ConfigParams = {
   authorizationParams: {
     response_type: 'code',
     scope: 'openid profile email'
+  },
+  session: {
+    cookie: {
+      // 2. OBLIGATORIO: Permite que la cookie se envíe Cross-Origin (Vercel -> Render)
+      sameSite: 'none' as const,
+
+      // 3. OBLIGATORIO: Necesario cuando sameSite es 'none', ya que ambos hosts son HTTPS
+      secure: true
+    }
   }
 };
