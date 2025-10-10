@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Employee } from './entities/empleado.entity';
@@ -7,12 +11,14 @@ import { UpdateEmployeeDto } from './dto/update-empleado.dto';
 import { SearchEmpleadoDto } from './dto/search-empleado.dto';
 import { User } from 'src/user/entities/user.entity';
 import { Absence } from 'src/absence/entities/absence.entity';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class EmpleadoService {
   constructor(
     @InjectRepository(Employee)
     private readonly employeeRepository: Repository<Employee>,
+    private readonly notificationsService: NotificationsService
   ) {}
 
   // ---- Calcular edad ----
@@ -31,15 +37,32 @@ export class EmpleadoService {
   }
 
   // ---- Crear empleado (multi-tenant) ----
-  async create(createEmployeeDto: CreateEmployeeDto, user: User): Promise<Employee> {
+  async create(
+    createEmployeeDto: CreateEmployeeDto,
+    user: User
+  ): Promise<Employee> {
     try {
       const employee = this.employeeRepository.create({
         ...createEmployeeDto,
         company: user.company, // multi-tenant seguro
-        user: user,            // relación uno a uno con el user autenticado
+        user: user // relación uno a uno con el user autenticado
       });
 
-      return await this.employeeRepository.save(employee);
+      const savedEmployee = await this.employeeRepository.save(employee);
+
+      // 🔔 Notificar empleado agregado
+      try {
+        await this.notificationsService.notifyEmployeeAdded(
+          user.company.id,
+          `${savedEmployee.first_name} ${savedEmployee.last_name}`,
+          savedEmployee.position?.name || 'Empleado'
+        );
+      } catch (notificationError) {
+        // No fallar la creación del empleado si la notificación falla
+        console.error('Error enviando notificación:', notificationError);
+      }
+
+      return savedEmployee;
     } catch (error) {
       throw new InternalServerErrorException('No se pudo crear el empleado');
     }
@@ -54,17 +77,20 @@ export class EmpleadoService {
 
     const employees = await this.employeeRepository.find({
       where: { company: { id: company.id } },
-      relations: ['company', 'department', 'user'],
+      relations: ['company', 'department', 'user']
     });
 
-    return employees.map(emp => ({
+    return employees.map((emp) => ({
       ...emp,
-      age: emp.birthdate ? this.calculateAge(emp.birthdate) : undefined,
+      age: emp.birthdate ? this.calculateAge(emp.birthdate) : undefined
     }));
   }
 
   // ---- Buscar por ID (multi-tenant + edad) ----
-  async findOne(id: string, authUser: User): Promise<Employee & { age?: number }> {
+  async findOne(
+    id: string,
+    authUser: User
+  ): Promise<Employee & { age?: number }> {
     const company = authUser.company;
     if (!company) {
       throw new InternalServerErrorException('User has no associated company');
@@ -72,17 +98,23 @@ export class EmpleadoService {
 
     const employee = await this.employeeRepository.findOne({
       where: { id, company: { id: company.id } },
-      relations: ['company', 'department', 'user'],
+      relations: ['company', 'department', 'user']
     });
 
-    if (!employee) throw new NotFoundException(`Empleado con ID ${id} no encontrado`);
+    if (!employee)
+      throw new NotFoundException(`Empleado con ID ${id} no encontrado`);
 
-    const age = employee.birthdate ? this.calculateAge(employee.birthdate) : undefined;
+    const age = employee.birthdate
+      ? this.calculateAge(employee.birthdate)
+      : undefined;
     return { ...employee, age };
   }
 
   // ---- Búsqueda dinámica (multi-tenant + edad) ----
-  async search(authUser: User, searchDto: SearchEmpleadoDto): Promise<(Employee & { age?: number })[]> {
+  async search(
+    authUser: User,
+    searchDto: SearchEmpleadoDto
+  ): Promise<(Employee & { age?: number })[]> {
     const company = authUser.company;
     if (!company) {
       throw new InternalServerErrorException('User has no associated company');
@@ -97,27 +129,36 @@ export class EmpleadoService {
 
     const employees = await this.employeeRepository.find({
       where,
-      relations: ['company', 'department', 'user'],
+      relations: ['company', 'department', 'user']
     });
 
     if (!employees || employees.length === 0) {
-      throw new NotFoundException('No se encontraron empleados con esos criterios');
+      throw new NotFoundException(
+        'No se encontraron empleados con esos criterios'
+      );
     }
 
-    return employees.map(emp => ({
+    return employees.map((emp) => ({
       ...emp,
-      age: emp.birthdate ? this.calculateAge(emp.birthdate) : undefined,
+      age: emp.birthdate ? this.calculateAge(emp.birthdate) : undefined
     }));
   }
 
   // ---- Actualizar empleado ----
-  async update(id: string, updateEmployeeDto: UpdateEmployeeDto, authUser: User): Promise<Employee> {
+  async update(
+    id: string,
+    updateEmployeeDto: UpdateEmployeeDto,
+    authUser: User
+  ): Promise<Employee> {
     const company = authUser.company;
     if (!company) {
       throw new InternalServerErrorException('User has no associated company');
     }
 
-    await this.employeeRepository.update({ id, company: { id: company.id } }, updateEmployeeDto);
+    await this.employeeRepository.update(
+      { id, company: { id: company.id } },
+      updateEmployeeDto
+    );
     return this.findOne(id, authUser);
   }
 
@@ -128,45 +169,47 @@ export class EmpleadoService {
       throw new InternalServerErrorException('User has no associated company');
     }
 
-    await this.employeeRepository.softDelete({ id, company: { id: company.id } });
+    await this.employeeRepository.softDelete({
+      id,
+      company: { id: company.id }
+    });
   }
 
   async getAusenciasByEmpleado(
-  employeeId: string,
-  authUser: User,
-  month?: number,
-  year?: number
-): Promise<Absence[]> {
-  const companyId = authUser.company?.id;
-  if (!companyId) {
-    throw new InternalServerErrorException('User has no associated company');
+    employeeId: string,
+    authUser: User,
+    month?: number,
+    year?: number
+  ): Promise<Absence[]> {
+    const companyId = authUser.company?.id;
+    if (!companyId) {
+      throw new InternalServerErrorException('User has no associated company');
+    }
+
+    // Verificamos que el empleado pertenezca a la empresa
+    const empleado = await this.employeeRepository.findOne({
+      where: { id: employeeId, company: { id: companyId } },
+      relations: ['absences']
+    });
+
+    if (!empleado) {
+      throw new NotFoundException('Empleado no encontrado en tu empresa');
+    }
+
+    // Determinar mes y año actual si no se pasan
+    const now = new Date();
+    const targetMonth = month ?? now.getMonth() + 1; // getMonth() es 0-indexed
+    const targetYear = year ?? now.getFullYear();
+
+    // Filtrar ausencias por mes y año
+    const ausenciasFiltradas = empleado.absences.filter((ausencia) => {
+      const fecha = new Date(ausencia.start_date);
+      return (
+        fecha.getMonth() + 1 === targetMonth &&
+        fecha.getFullYear() === targetYear
+      );
+    });
+
+    return ausenciasFiltradas;
   }
-
-  // Verificamos que el empleado pertenezca a la empresa
-  const empleado = await this.employeeRepository.findOne({
-    where: { id: employeeId, company: { id: companyId } },
-    relations: ['absences'],
-  });
-
-  if (!empleado) {
-    throw new NotFoundException('Empleado no encontrado en tu empresa');
-  }
-
-  // Determinar mes y año actual si no se pasan
-  const now = new Date();
-  const targetMonth = month ?? now.getMonth() + 1; // getMonth() es 0-indexed
-  const targetYear = year ?? now.getFullYear();
-
-  // Filtrar ausencias por mes y año
-  const ausenciasFiltradas = empleado.absences.filter((ausencia) => {
-   const fecha = new Date(ausencia.start_date);
-    return (
-      fecha.getMonth() + 1 === targetMonth &&
-      fecha.getFullYear() === targetYear
-    );
-  });
-
-  return ausenciasFiltradas;
-}
-
 }

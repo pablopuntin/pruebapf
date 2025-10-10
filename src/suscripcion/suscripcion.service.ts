@@ -4,12 +4,15 @@ import { Repository } from 'typeorm';
 import { UpdateSuscripcionDto } from './dto/update-suscripcion.dto';
 import { Suscripcion } from './entities/suscripcion.entity';
 import { CreateSuscripcionDto } from './dto/create-suscripcion.dto';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/entities/notification.entity';
 
 @Injectable()
 export class SuscripcionService {
   constructor(
     @InjectRepository(Suscripcion)
-    private readonly suscripcionRepository: Repository<Suscripcion>
+    private readonly suscripcionRepository: Repository<Suscripcion>,
+    private readonly notificationsService: NotificationsService
   ) {}
 
   /*  async create(
@@ -65,5 +68,40 @@ export class SuscripcionService {
       '_' +
       Date.now().toString(36)
     );
+  }
+
+  // 🔔 Método para notificar cambio de suscripción
+  async notifySubscriptionChange(
+    suscripcionId: string,
+    changeType: string
+  ): Promise<void> {
+    try {
+      const suscripcion = await this.findOne(suscripcionId);
+
+      await this.notificationsService.createNotification(
+        suscripcion.company.id,
+        '🔄 Suscripción actualizada',
+        `Tu suscripción ha sido ${changeType}. Plan: ${suscripcion.plan.name}`,
+        'subscription_updated' as NotificationType
+      );
+    } catch (error) {
+      console.error('Error enviando notificación de suscripción:', error);
+    }
+  }
+
+  // 🔔 Método para notificar cancelación de suscripción
+  async notifySubscriptionCancellation(suscripcionId: string): Promise<void> {
+    try {
+      const suscripcion = await this.findOne(suscripcionId);
+
+      await this.notificationsService.createNotification(
+        suscripcion.company.id,
+        '❌ Suscripción cancelada',
+        `Tu suscripción al plan ${suscripcion.plan.name} ha sido cancelada`,
+        'subscription_cancelled' as NotificationType
+      );
+    } catch (error) {
+      console.error('Error enviando notificación de cancelación:', error);
+    }
   }
 }

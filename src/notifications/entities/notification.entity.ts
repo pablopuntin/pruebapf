@@ -17,6 +17,8 @@ export enum NotificationType {
   HOLIDAY_REMINDER = 'holiday_reminder',
   SUBSCRIPTION_EXPIRING = 'subscription_expiring',
   SUBSCRIPTION_EXPIRED = 'subscription_expired',
+  SUBSCRIPTION_UPDATED = 'subscription_updated',
+  SUBSCRIPTION_CANCELLED = 'subscription_cancelled',
   BIRTHDAY_REMINDER = 'birthday_reminder',
   CUSTOM_NOTIFICATION = 'custom_notification'
 }
