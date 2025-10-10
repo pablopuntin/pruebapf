@@ -138,6 +138,68 @@ export class NotificationsService {
     }
   }
 
+  // 🔔 MÉTODOS PÚBLICOS PARA EVENTOS EN TIEMPO REAL
+  
+  // 👤 Notificar empleado agregado
+  async notifyEmployeeAdded(companyId: string, employeeName: string, position?: string) {
+    this.logger.log(`👤 Notificando empleado agregado: ${employeeName}`);
+    
+    await this.createNotification(
+      companyId,
+      '👤 Nuevo empleado agregado',
+      `Se agregó ${employeeName}${position ? ` como ${position}` : ''} al equipo`,
+      'employee_added' as NotificationType
+    );
+  }
+
+  // 💰 Notificar nómina procesada
+  async notifyPayrollProcessed(companyId: string, period: string, totalEmployees: number) {
+    this.logger.log(`💰 Notificando nómina procesada para período: ${period}`);
+    
+    await this.createNotification(
+      companyId,
+      '💰 Nómina procesada',
+      `La nómina del período ${period} ha sido procesada para ${totalEmployees} empleados`,
+      'payroll_processed' as NotificationType
+    );
+  }
+
+  // 📊 Notificar reporte de productividad
+  async notifyProductivityReport(companyId: string, reportType: string, period: string) {
+    this.logger.log(`📊 Notificando reporte de productividad: ${reportType}`);
+    
+    await this.createNotification(
+      companyId,
+      '📊 Reporte de productividad disponible',
+      `El reporte de ${reportType} para el período ${period} está listo para revisión`,
+      'productivity_report' as NotificationType
+    );
+  }
+
+  // 📝 Notificar actualización de categoría
+  async notifyCategoryUpdate(companyId: string, categoryName: string, action: string) {
+    this.logger.log(`📝 Notificando actualización de categoría: ${categoryName}`);
+    
+    await this.createNotification(
+      companyId,
+      '📝 Categoría actualizada',
+      `La categoría ${categoryName} ha sido ${action}`,
+      'category_update' as NotificationType
+    );
+  }
+
+  // 📋 Notificar recordatorio de evaluación
+  async notifyEvaluationReminder(companyId: string, employeeName: string, evaluationType: string) {
+    this.logger.log(`📋 Notificando recordatorio de evaluación: ${employeeName}`);
+    
+    await this.createNotification(
+      companyId,
+      '📋 Recordatorio de evaluación',
+      `Es hora de realizar la evaluación ${evaluationType} de ${employeeName}`,
+      'evaluation_reminder' as NotificationType
+    );
+  }
+
   // 📅 Agendar recordatorio personalizado
   async scheduleReminder(
     userId: string,
