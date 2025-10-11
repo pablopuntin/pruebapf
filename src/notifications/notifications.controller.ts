@@ -11,7 +11,7 @@ import {
   Req
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-import { Auth0DbGuard } from '../auth/guards/auth0db.guard';
+
 import {
   ApiTags,
   ApiOperation,
@@ -62,7 +62,7 @@ export class NotificationsController {
     @Query('limit') limit: number = 10,
     @Req() req: Request
   ) {
-    const userId = req.oidc?.user?.sub;
+    const userId = '21142141241';
     return this.notificationsService.findAll(userId, page, limit);
   }
 
@@ -311,7 +311,7 @@ export class NotificationsController {
       type?: string;
     }
   ) {
-    const userId = req.oidc?.user?.sub;
+    const userId = '21142141241';
     const scheduledDate = new Date(body.scheduledDate);
 
     return this.notificationsService.scheduleReminder(
