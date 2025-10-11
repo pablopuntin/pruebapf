@@ -102,6 +102,13 @@ export class UserService {
     return user as User;
   }
 
+  async findByClerkId(clerkId: string) {
+    return this.userRepository.findOne({
+      where: { clerkId: clerkId },
+      relations: ['company', 'role']
+    });
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     await this.userRepository.update(id, updateUserDto);
     return this.findOne(id);
