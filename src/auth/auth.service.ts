@@ -3,11 +3,9 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common';
-import type { Response, Request } from 'express';
-import { Auth0Service } from './auth0.service';
+import { ClerkService } from './clerk.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateRegisterDto } from './dto/create-register.dto';
-import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import { Company } from 'src/empresa/entities/empresa.entity';
 import { User } from 'src/user/entities/user.entity';
@@ -29,8 +27,7 @@ export class AuthService {
     private readonly suscriptionsRepository: Repository<Suscripcion>,
     @InjectRepository(Rol)
     private readonly rolesRepository: Repository<Rol>,
-    private readonly jwtService: JwtService,
-    private readonly auth0Service: Auth0Service
+    private readonly clerkService: ClerkService
   ) {}
 
   //-------------Crear Registro-------------//
@@ -113,7 +110,15 @@ export class AuthService {
       throw new ConflictException('Email already exist.');
     }
 
+    // Registro en Clerk
+    const clearkUser = await this.clerkService.createUser(
+      newRegister.email,
+      newRegister.password,
+      newRegister.name
+    );
+
     const newUser = new User();
+    newUser.clerkId = clearkUser.id;
     newUser.email = newRegister.email;
     newUser.first_name = newRegister.name;
     newUser.role = rol;
@@ -123,75 +128,8 @@ export class AuthService {
 
     await this.usersRepository.save(newUser);
 
-    // Registro en Auth0
-    await this.auth0Service.createUser(
-      newRegister.email,
-      newRegister.password,
-      newRegister.name
-    );
-
     return {
       message: 'Register successfully.'
     };
-  }
-
-  //-------------Generar Token para cookie-------------//
-
-  async generateAppToken(user: any, res: Response) {
-    const userLogin = await this.usersRepository.findOne({
-      where: { email: user.email },
-      relations: { company: true, role: true }
-    });
-
-    if (!userLogin) {
-      throw new NotFoundException('User not found in DB.');
-    }
-
-    const { id, email, first_name, role, company, ...props } = userLogin;
-
-    // Token JWT
-    const appToken = this.jwtService.sign({
-      sub: user.sub,
-      id: id,
-      email: email,
-      name: first_name,
-      rol: role.name,
-      companyId: company.id
-    });
-
-    // Setear cookie
-    res.cookie('app_token', appToken, {
-      httpOnly: false, // ⚠️ accesible desde el frontend
-      secure: true,
-      sameSite: 'none',
-      path: '/',
-      domain: 'front-git-main-hr-systems-projects.vercel.app'
-    });
-
-    return appToken; // opcional si lo quieres usar
-  }
-
-  //-------------Perfil de usuario y JWT-------------//
-  async getUserWithJwt(email: string) {
-    const userLogin = await this.usersRepository.findOne({
-      where: { email },
-      relations: { company: true, role: true }
-    });
-
-    if (!userLogin) {
-      throw new NotFoundException('User not found in DB.');
-    }
-
-    const payload = {
-      id: userLogin.id,
-      email: userLogin.email,
-      name: userLogin.first_name,
-      rol: userLogin.role.name,
-      companyId: userLogin.company.id
-    };
-
-    const appToken = this.jwtService.sign(payload);
-
-    return { user: userLogin, appToken };
   }
 }
