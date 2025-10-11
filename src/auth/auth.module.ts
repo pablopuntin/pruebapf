@@ -8,11 +8,12 @@ import { Plan } from 'src/plan/entities/plan.entity';
 import { Suscripcion } from 'src/suscripcion/entities/suscripcion.entity';
 import { Rol } from 'src/rol/entities/rol.entity';
 import { ClerkService } from './clerk.service';
+import { UserService } from 'src/user/user.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Company, Plan, Suscripcion, Rol])],
   controllers: [AuthController],
-  providers: [AuthService, ClerkService],
+  providers: [AuthService, ClerkService, UserService],
   exports: [AuthService]
 })
 export class AuthModule {}
