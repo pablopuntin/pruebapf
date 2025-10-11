@@ -40,10 +40,10 @@ export class User {
   @Column({
     type: 'varchar',
     length: 50,
-    nullable: true,
+    nullable: false,
     unique: false
   })
-  first_name: string | null;
+  first_name: string;
 
   @Column({
     type: 'varchar',
