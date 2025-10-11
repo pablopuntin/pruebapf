@@ -20,6 +20,11 @@ export class AuthController {
     return 'Hola';
   }
 
+  @Post('/prueba/token')
+  async getUserWithJwt(@Body() email: string) {
+    return this.authService.getUserWithJwt(email);
+  }
+
   @Post('onboarding')
   async create(@Body() newRegister: CreateRegisterDto) {
     return this.authService.create(newRegister);

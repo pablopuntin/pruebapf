@@ -14,6 +14,8 @@ import { Suscripcion } from 'src/suscripcion/entities/suscripcion.entity';
 import { Rol } from 'src/rol/entities/rol.entity';
 import { Role } from 'src/rol/enums/role.enum';
 
+import { JwtService } from '@nestjs/jwt';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -27,7 +29,8 @@ export class AuthService {
     private readonly suscriptionsRepository: Repository<Suscripcion>,
     @InjectRepository(Rol)
     private readonly rolesRepository: Repository<Rol>,
-    private readonly clerkService: ClerkService
+    private readonly clerkService: ClerkService,
+    private readonly jwtService: JwtService
   ) {}
 
   //-------------Crear Registro-------------//
@@ -131,5 +134,29 @@ export class AuthService {
     return {
       message: 'Register successfully.'
     };
+  }
+
+  //-------------Perfil de usuario y JWT-------------//
+  async getUserWithJwt(email: string) {
+    const userLogin = await this.usersRepository.findOne({
+      where: { email },
+      relations: { company: true, role: true }
+    });
+
+    if (!userLogin) {
+      throw new NotFoundException('User not found in DB.');
+    }
+
+    const payload = {
+      id: userLogin.id,
+      email: userLogin.email,
+      name: userLogin.first_name,
+      rol: userLogin.role.name,
+      companyId: userLogin.company.id
+    };
+
+    const appToken = this.jwtService.sign(payload);
+
+    return { user: userLogin, appToken };
   }
 }
