@@ -10,14 +10,18 @@ import {
 import { AuthService } from './auth.service';
 import { CreateRegisterDto } from './dto/create-register.dto';
 import type { Request, Response } from 'express';
+import { ClerkAuthGuard } from './guards/clerk.guard';
+import type { AuthRequest } from 'src/interfaces/authrequest.interface';
 
 @Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @UseGuards(ClerkAuthGuard)
   @Get('auth/me')
-  async getProfile(@Req() req: Request) {
-    return 'Hola';
+  async getAuthUser(@Req() req: AuthRequest) {
+    const { clerkId } = req.user;
+    return this.authService.getAuthUser(clerkId);
   }
 
   @Post('/prueba/token')
