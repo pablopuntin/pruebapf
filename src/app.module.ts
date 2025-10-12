@@ -31,6 +31,7 @@ import { Plan } from './plan/entities/plan.entity';
 import { Rol } from './rol/entities/rol.entity';
 import { Departamento } from './departamento/entities/departamento.entity';
 import { Position } from './position/entities/position.entity';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { Position } from './position/entities/position.entity';
     AbsenceModule,
     ContactModule,
     NotificationsModule,
+    ChatModule,
     TypeOrmModule.forFeature([Plan, Rol, Departamento, Position])
   ],
   controllers: [AppController],
