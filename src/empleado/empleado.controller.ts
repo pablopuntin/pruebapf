@@ -250,69 +250,98 @@ import { EmpleadoService } from './empleado.service';
 import { CreateEmployeeDto } from './dto/create-empleado.dto';
 import { UpdateEmployeeDto } from './dto/update-empleado.dto';
 import { SearchEmpleadoDto } from './dto/search-empleado.dto';
-import { AuthUser } from 'src/decoradores/aut-user.decoratos';
+import { AuthUser } from 'src/decoradores/auth-user.decoratos';
 import { ClerkAuthGuard } from 'src/auth/guards/clerk.guard';
 import { User } from 'src/user/entities/user.entity';
 
-@UseGuards(ClerkAuthGuard)
 @ApiTags('Empleado')
 @Controller('empleado')
+@UseGuards(ClerkAuthGuard) // 👈 aplica el guard a TODO el controller
 export class EmpleadoController {
   constructor(private readonly empleadoService: EmpleadoService) {}
 
-  // 🧩 Crear empleado
+  // ✅ Crear empleado
   @Post()
-  @ApiOperation({ summary: 'Crear nuevo empleado' })
+  @ApiOperation({
+    summary: 'Crear nuevo empleado',
+    description:
+      'Registra un nuevo empleado en el sistema. La empresa se obtiene automáticamente del usuario autenticado.'
+  })
   @ApiBody({ type: CreateEmployeeDto })
-  async create(@AuthUser() user: User, @Body() dto: CreateEmployeeDto) {
+  @ApiResponse({ status: 201, description: 'Empleado creado exitosamente' })
+  async create(@AuthUser() user: any, @Body() dto: CreateEmployeeDto) {
     return this.empleadoService.create(dto, user);
   }
 
-  // 📋 Listar todos los empleados
+  // ✅ Obtener todos los empleados
   @Get()
-  @ApiOperation({ summary: 'Obtener todos los empleados' })
-  async findAll(@AuthUser() user: User) {
+  @ApiOperation({
+    summary: 'Obtener todos los empleados',
+    description: 'Retorna una lista de todos los empleados registrados'
+  })
+  @ApiResponse({ status: 200, description: 'Lista de empleados obtenida' })
+  async findAll(@AuthUser() user: any) {
     return this.empleadoService.findAll(user);
   }
 
-  // 🔍 Buscar por ID
+  // ✅ Buscar por ID
   @Get(':id')
-  @ApiOperation({ summary: 'Obtener empleado por ID' })
-  async findOne(@Param('id') id: string, @AuthUser() user: User) {
+  @ApiOperation({
+    summary: 'Obtener empleado por ID',
+    description: 'Retorna la información completa de un empleado específico'
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'UUID del empleado',
+    example: '123e4567-e89b-12d3-a456-426614174000'
+  })
+  async findOne(@Param('id') id: string, @AuthUser() user: any) {
     return this.empleadoService.findOne(id, user);
   }
 
-  // 🔎 Búsqueda avanzada
+  // ✅ Buscar empleados (filtro)
   @Get('search')
-  @ApiOperation({ summary: 'Buscar empleados' })
-  async searchEmpleados(
-    @AuthUser() user: User,
-    @Query() searchDto: SearchEmpleadoDto
-  ) {
+  @ApiOperation({
+    summary: 'Buscar empleados',
+    description:
+      'Busca empleados según criterios (nombre, apellido, email, etc.)'
+  })
+  async searchEmpleados(@AuthUser() user: any, @Query() searchDto: SearchEmpleadoDto) {
     return this.empleadoService.search(user, searchDto);
   }
 
-  // ✏️ Actualizar empleado
+  // ✅ Actualizar empleado
   @Patch(':id')
-  @ApiOperation({ summary: 'Actualizar empleado' })
+  @ApiOperation({
+    summary: 'Actualizar empleado',
+    description:
+      'Actualiza la información de un empleado existente. Solo se actualizan los campos enviados.'
+  })
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateEmployeeDto,
-    @AuthUser() user: User
+    @AuthUser() user: any
   ) {
     return this.empleadoService.update(id, dto, user);
   }
 
-  // 🗑️ Eliminar empleado
+  // ✅ Eliminar empleado
   @Delete(':id')
-  @ApiOperation({ summary: 'Eliminar empleado' })
-  async remove(@Param('id') id: string, @AuthUser() user: User) {
+  @ApiOperation({
+    summary: 'Eliminar empleado',
+    description: 'Elimina un empleado del sistema (soft delete)'
+  })
+  async remove(@Param('id') id: string, @AuthUser() user: any) {
     return this.empleadoService.remove(id, user);
   }
 
-  // 📆 Ausencias del empleado
+  // ✅ Ausencias del empleado
   @Get(':id/ausencias')
-  @ApiOperation({ summary: 'Obtener ausencias de un empleado' })
+  @ApiOperation({
+    summary: 'Obtener ausencias por empleado',
+    description:
+      'Devuelve las ausencias de un empleado según mes y año (opcional).'
+  })
   async getAusenciasByEmpleado(
     @Param('id') employeeId: string,
     @AuthUser() user: User,
