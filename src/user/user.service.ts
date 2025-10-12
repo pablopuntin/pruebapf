@@ -72,7 +72,7 @@ export class UserService {
       newUser.company = company;
     }
     if (employee) {
-      newUser.employee = employee;
+      newUser.employees = [employee];
     }
     newUser.first_name = createUserDto.first_name;
     newUser.last_name = createUserDto.last_name;
