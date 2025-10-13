@@ -11,6 +11,7 @@ import {
   Req
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
+import { CreateSimpleNotificationDto } from './dto/create-simple-notification.dto';
 
 import {
   ApiTags,
@@ -285,6 +286,87 @@ export class NotificationsController {
       body.message,
       body.type as any
     );
+  }
+
+  @UseGuards(ClerkAuthGuard)
+  @Post('simple')
+  @ApiOperation({
+    summary: 'Crear notificación simple (formato frontend)',
+    description:
+      'Endpoint simplificado para crear notificaciones desde el frontend'
+  })
+  @ApiBody({ type: CreateSimpleNotificationDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Notificación creada exitosamente.',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Notificación creada exitosamente'
+        },
+        notification: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: 'uuid-de-la-notificacion' },
+            title: { type: 'string', example: 'Nuevo empleado registrado' },
+            message: {
+              type: 'string',
+              example: 'Se agregó a Juan Pérez al sistema.'
+            },
+            type: { type: 'string', example: 'employee' },
+            is_read: { type: 'boolean', example: false },
+            created_at: { type: 'string', example: '2025-10-13T16:44:00.000Z' }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
+  async createSimpleNotification(
+    @Body() createSimpleNotificationDto: CreateSimpleNotificationDto,
+    @Req() req: Request
+  ) {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
+
+    // Mapear el tipo simple al tipo del enum
+    const typeMapping = {
+      employee: 'employee_added',
+      payroll: 'payroll_processed',
+      productivity: 'productivity_report',
+      category: 'category_update',
+      evaluation: 'evaluation_reminder',
+      holiday: 'holiday_reminder',
+      subscription: 'subscription_updated',
+      birthday: 'birthday_reminder',
+      custom: 'custom_notification'
+    };
+
+    const mappedType =
+      typeMapping[createSimpleNotificationDto.type] || 'custom_notification';
+
+    const notification = await this.notificationsService.createNotification(
+      userId,
+      createSimpleNotificationDto.title,
+      createSimpleNotificationDto.message,
+      mappedType as any
+    );
+
+    return {
+      message: 'Notificación creada exitosamente',
+      notification: {
+        id: notification.id,
+        title: notification.title,
+        message: notification.message,
+        type: createSimpleNotificationDto.type, // Devolver el tipo original
+        is_read: notification.is_read,
+        created_at: notification.created_at
+      }
+    };
   }
 
   @UseGuards(ClerkAuthGuard)
