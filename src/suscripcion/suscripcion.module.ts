@@ -6,11 +6,13 @@ import { Suscripcion } from './entities/suscripcion.entity';
 import { Plan } from '../plan/entities/plan.entity';
 import { Company } from '../empresa/entities/empresa.entity';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Suscripcion, Plan, Company]),
-    NotificationsModule
+    NotificationsModule,
+    UserModule
   ],
   controllers: [SuscripcionController],
   providers: [SuscripcionService],
