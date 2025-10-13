@@ -11,7 +11,7 @@ import {
   Req
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-
+import { ClerkAuthGuard } from '../auth/guards/clerk.guard';
 import {
   ApiTags,
   ApiOperation,
@@ -20,12 +20,12 @@ import {
   ApiQuery,
   ApiBody
 } from '@nestjs/swagger';
-import { NotificationType } from './entities/notification.entity';
 import type { Request } from 'express';
+import { AuthenticatedUser } from '../interfaces/authenticated-user.interface';
 
 @ApiTags('Notificaciones')
 @Controller('notifications')
-// @UseGuards(Auth0DbGuard) // Temporalmente deshabilitado para testing
+@UseGuards(ClerkAuthGuard)
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
@@ -60,9 +60,9 @@ export class NotificationsController {
   async getNotifications(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-    @Req() req: Request
+    @Req() req: Request & { user: AuthenticatedUser }
   ) {
-    const userId = '21142141241';
+    const userId = req.user.id;
     return this.notificationsService.findAll(userId, page, limit);
   }
 
@@ -302,7 +302,7 @@ export class NotificationsController {
     description: 'Recordatorio agendado exitosamente.'
   })
   async scheduleReminder(
-    @Req() req: Request,
+    @Req() req: Request & { user: AuthenticatedUser },
     @Body()
     body: {
       title: string;
@@ -311,7 +311,7 @@ export class NotificationsController {
       type?: string;
     }
   ) {
-    const userId = '21142141241';
+    const userId = req.user.id;
     const scheduledDate = new Date(body.scheduledDate);
 
     return this.notificationsService.scheduleReminder(
