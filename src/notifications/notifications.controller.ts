@@ -22,16 +22,16 @@ import {
 } from '@nestjs/swagger';
 import { NotificationType } from './entities/notification.entity';
 import type { Request } from 'express';
-import { ClerkGuard } from '../auth/clerk.guard';
+import { ClerkAuthGuard } from 'src/auth/guards/clerk.guard';
 
 @ApiTags('Notificaciones')
 @Controller('notifications')
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
+  @UseGuards(ClerkAuthGuard)
   @Get()
   @ApiOperation({ summary: 'Obtener notificaciones del usuario' })
-  @useGuards(ClerkGuard)
   @ApiQuery({
     name: 'page',
     required: false,
@@ -67,10 +67,10 @@ export class NotificationsController {
     return this.notificationsService.findAll(userId, page, limit);
   }
 
+  @UseGuards(ClerkAuthGuard)
   @Post('mark-read/:id')
   @ApiOperation({ summary: 'Marcar notificación como leída' })
   @ApiParam({ name: 'id', description: 'ID de la notificación' })
-  @useGuards(ClerkGuard)
   @ApiBody({
     schema: {
       type: 'object',
@@ -95,10 +95,10 @@ export class NotificationsController {
     return this.notificationsService.markAsRead(notificationId, userId);
   }
 
+  @UseGuards(ClerkAuthGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar notificación' })
   @ApiParam({ name: 'id', description: 'ID de la notificación' })
-  @useGuards(ClerkGuard)
   @ApiBody({
     schema: {
       type: 'object',
@@ -123,9 +123,9 @@ export class NotificationsController {
     return this.notificationsService.remove(userId, notificationId);
   }
 
+  @UseGuards(ClerkAuthGuard)
   @Post('mark-all-read')
   @ApiOperation({ summary: 'Marcar todas las notificaciones como leídas' })
-  @useGuards(ClerkGuard)
   @ApiBody({
     schema: {
       type: 'object',
@@ -146,9 +146,9 @@ export class NotificationsController {
     return this.notificationsService.markAllAsRead(userId);
   }
 
+  @UseGuards(ClerkAuthGuard)
   @Delete('delete-all')
   @ApiOperation({ summary: 'Eliminar todas las notificaciones' })
-  @useGuards(ClerkGuard)
   @ApiBody({
     schema: {
       type: 'object',
@@ -169,9 +169,9 @@ export class NotificationsController {
     return this.notificationsService.deleteAll(userId);
   }
 
+  @UseGuards(ClerkAuthGuard)
   @Get('config')
   @ApiOperation({ summary: 'Obtener configuración de notificaciones' })
-  @useGuards(ClerkGuard)
   @ApiBody({
     schema: {
       type: 'object',
@@ -192,9 +192,9 @@ export class NotificationsController {
     return this.notificationsService.getNotificationConfig(userId);
   }
 
+  @UseGuards(ClerkAuthGuard)
   @Put('config')
   @ApiOperation({ summary: 'Actualizar configuración de notificaciones' })
-  @useGuards(ClerkGuard)
   @ApiBody({
     schema: {
       type: 'object',
@@ -227,9 +227,9 @@ export class NotificationsController {
     return this.notificationsService.updateNotificationConfig(userId, config);
   }
 
+  @UseGuards(ClerkAuthGuard)
   @Post('create')
   @ApiOperation({ summary: 'Crear una notificación manual (para testing)' })
-  @useGuards(ClerkGuard)
   @ApiBody({
     schema: {
       type: 'object',
@@ -284,9 +284,9 @@ export class NotificationsController {
     );
   }
 
+  @UseGuards(ClerkAuthGuard)
   @Post('schedule-reminder')
   @ApiOperation({ summary: 'Agendar un recordatorio personalizado' })
-  @useGuards(ClerkGuard)
   @ApiBody({
     schema: {
       type: 'object',
