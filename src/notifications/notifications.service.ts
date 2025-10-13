@@ -532,27 +532,32 @@ export class NotificationsService {
 
   // Obtener notificaciones de un usuario
   async findAll(userId: string, page: number = 1, limit: number = 10) {
-    const [notifications, total] =
-      await this.notificationRepository.findAndCount({
-        where: { user: { id: userId }, is_deleted: false },
-        order: { created_at: 'DESC' },
-        skip: (page - 1) * limit,
-        take: limit
-      });
+    try {
+      const [notifications, total] =
+        await this.notificationRepository.findAndCount({
+          where: { user_id: userId, is_deleted: false },
+          order: { created_at: 'DESC' },
+          skip: (page - 1) * limit,
+          take: limit
+        });
 
-    return {
-      notifications,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit)
-    };
+      return {
+        notifications,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      };
+    } catch (error) {
+      this.logger.error('Error obteniendo notificaciones:', error);
+      throw error;
+    }
   }
 
   // Marcar notificación como leída
   async markAsRead(userId: string, notificationId: string) {
     const notification = await this.notificationRepository.findOne({
-      where: { id: notificationId, user: { id: userId } }
+      where: { id: notificationId, user_id: userId }
     });
 
     if (!notification) {
@@ -566,7 +571,7 @@ export class NotificationsService {
   // Eliminar notificación
   async remove(userId: string, notificationId: string) {
     const notification = await this.notificationRepository.findOne({
-      where: { id: notificationId, user: { id: userId } }
+      where: { id: notificationId, user_id: userId }
     });
 
     if (!notification) {
@@ -580,7 +585,7 @@ export class NotificationsService {
   // Marcar todas como leídas
   async markAllAsRead(userId: string) {
     await this.notificationRepository.update(
-      { user: { id: userId }, is_read: false },
+      { user_id: userId, is_read: false },
       { is_read: true }
     );
   }
@@ -588,7 +593,7 @@ export class NotificationsService {
   // Eliminar todas las notificaciones
   async deleteAll(userId: string) {
     await this.notificationRepository.update(
-      { user: { id: userId }, is_deleted: false },
+      { user_id: userId, is_deleted: false },
       { is_deleted: true }
     );
   }
@@ -601,7 +606,7 @@ export class NotificationsService {
     }
 
     let config = await this.configRepository.findOne({
-      where: { user: { id: userId } }
+      where: { user_id: userId }
     });
 
     if (!config) {
@@ -628,11 +633,11 @@ export class NotificationsService {
     }
 
     let config = await this.configRepository.findOne({
-      where: { user: { id: userId } }
+      where: { user_id: userId }
     });
 
     if (!config) {
-      config = this.configRepository.create({ user });
+      config = this.configRepository.create({ user_id: userId });
     }
 
     Object.assign(config, configData);
