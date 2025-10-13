@@ -507,23 +507,6 @@ export class AuthService {
     });
   }
 
-  //-------------Perfil de usuario-------------//
-  async getAuthUser(clerkId: string) {
-    const userLogin = await this.usersRepository.findOne({
-      where: { clerkId: clerkId },
-      relations: { company: true, role: true }
-    });
-
-    if (!userLogin) {
-      throw new NotFoundException('User not found in DB.');
-    }
-
-    return {
-      message: 'User loguin.',
-      user: userLogin
-    };
-  }
-
   //-------------Perfil de usuario y JWT-------------//
   async getUserWithJwt(email: string) {
     const userLogin = await this.usersRepository.findOne({
