@@ -131,11 +131,15 @@ export class NotificationsService {
   }
 
   // 🔔 MÉTODOS PÚBLICOS PARA EVENTOS EN TIEMPO REAL
-  
+
   // 👤 Notificar empleado agregado
-  async notifyEmployeeAdded(companyId: string, employeeName: string, position?: string) {
+  async notifyEmployeeAdded(
+    companyId: string,
+    employeeName: string,
+    position?: string
+  ) {
     this.logger.log(`👤 Notificando empleado agregado: ${employeeName}`);
-    
+
     await this.createNotification(
       companyId,
       '👤 Nuevo empleado agregado',
@@ -145,9 +149,13 @@ export class NotificationsService {
   }
 
   // 💰 Notificar nómina procesada
-  async notifyPayrollProcessed(companyId: string, period: string, totalEmployees: number) {
+  async notifyPayrollProcessed(
+    companyId: string,
+    period: string,
+    totalEmployees: number
+  ) {
     this.logger.log(`💰 Notificando nómina procesada para período: ${period}`);
-    
+
     await this.createNotification(
       companyId,
       '💰 Nómina procesada',
@@ -157,9 +165,13 @@ export class NotificationsService {
   }
 
   // 📊 Notificar reporte de productividad
-  async notifyProductivityReport(companyId: string, reportType: string, period: string) {
+  async notifyProductivityReport(
+    companyId: string,
+    reportType: string,
+    period: string
+  ) {
     this.logger.log(`📊 Notificando reporte de productividad: ${reportType}`);
-    
+
     await this.createNotification(
       companyId,
       '📊 Reporte de productividad disponible',
@@ -169,9 +181,15 @@ export class NotificationsService {
   }
 
   // 📝 Notificar actualización de categoría
-  async notifyCategoryUpdate(companyId: string, categoryName: string, action: string) {
-    this.logger.log(`📝 Notificando actualización de categoría: ${categoryName}`);
-    
+  async notifyCategoryUpdate(
+    companyId: string,
+    categoryName: string,
+    action: string
+  ) {
+    this.logger.log(
+      `📝 Notificando actualización de categoría: ${categoryName}`
+    );
+
     await this.createNotification(
       companyId,
       '📝 Categoría actualizada',
@@ -181,9 +199,15 @@ export class NotificationsService {
   }
 
   // 📋 Notificar recordatorio de evaluación
-  async notifyEvaluationReminder(companyId: string, employeeName: string, evaluationType: string) {
-    this.logger.log(`📋 Notificando recordatorio de evaluación: ${employeeName}`);
-    
+  async notifyEvaluationReminder(
+    companyId: string,
+    employeeName: string,
+    evaluationType: string
+  ) {
+    this.logger.log(
+      `📋 Notificando recordatorio de evaluación: ${employeeName}`
+    );
+
     await this.createNotification(
       companyId,
       '📋 Recordatorio de evaluación',
@@ -524,27 +548,32 @@ export class NotificationsService {
 
   // Obtener notificaciones de un usuario
   async findAll(userId: string, page: number = 1, limit: number = 10) {
-    const [notifications, total] =
-      await this.notificationRepository.findAndCount({
-        where: { user: { id: userId }, is_deleted: false },
-        order: { created_at: 'DESC' },
-        skip: (page - 1) * limit,
-        take: limit
-      });
+    try {
+      const [notifications, total] =
+        await this.notificationRepository.findAndCount({
+          where: { user_id: userId, is_deleted: false },
+          order: { created_at: 'DESC' },
+          skip: (page - 1) * limit,
+          take: limit
+        });
 
-    return {
-      notifications,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit)
-    };
+      return {
+        notifications,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      };
+    } catch (error) {
+      this.logger.error('Error obteniendo notificaciones:', error);
+      throw error;
+    }
   }
 
   // Marcar notificación como leída
   async markAsRead(userId: string, notificationId: string) {
     const notification = await this.notificationRepository.findOne({
-      where: { id: notificationId, user: { id: userId } }
+      where: { id: notificationId, user_id: userId }
     });
 
     if (!notification) {
@@ -558,7 +587,7 @@ export class NotificationsService {
   // Eliminar notificación
   async remove(userId: string, notificationId: string) {
     const notification = await this.notificationRepository.findOne({
-      where: { id: notificationId, user: { id: userId } }
+      where: { id: notificationId, user_id: userId }
     });
 
     if (!notification) {
@@ -572,7 +601,7 @@ export class NotificationsService {
   // Marcar todas como leídas
   async markAllAsRead(userId: string) {
     await this.notificationRepository.update(
-      { user: { id: userId }, is_read: false },
+      { user_id: userId, is_read: false },
       { is_read: true }
     );
   }
@@ -580,7 +609,7 @@ export class NotificationsService {
   // Eliminar todas las notificaciones
   async deleteAll(userId: string) {
     await this.notificationRepository.update(
-      { user: { id: userId }, is_deleted: false },
+      { user_id: userId, is_deleted: false },
       { is_deleted: true }
     );
   }
@@ -593,7 +622,7 @@ export class NotificationsService {
     }
 
     let config = await this.configRepository.findOne({
-      where: { user: { id: userId } }
+      where: { user_id: userId }
     });
 
     if (!config) {
@@ -620,11 +649,11 @@ export class NotificationsService {
     }
 
     let config = await this.configRepository.findOne({
-      where: { user: { id: userId } }
+      where: { user_id: userId }
     });
 
     if (!config) {
-      config = this.configRepository.create({ user });
+      config = this.configRepository.create({ user_id: userId });
     }
 
     Object.assign(config, configData);
