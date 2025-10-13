@@ -5,11 +5,15 @@ import {
   Body,
   Patch,
   Param,
-  Delete
+  Delete,
+  UseGuards,
+  Req
 } from '@nestjs/common';
 import { SuscripcionService } from './suscripcion.service';
 import { CreateSuscripcionDto } from './dto/create-suscripcion.dto';
 import { UpdateSuscripcionDto } from './dto/update-suscripcion.dto';
+import { CreateSubscriptionRequestDto } from './dto/create-subscription-request.dto';
+import { SubscriptionResponseDto } from './dto/subscription-response.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -17,26 +21,54 @@ import {
   ApiParam,
   ApiBody
 } from '@nestjs/swagger';
+import { ClerkAuthGuard } from '../auth/guards/clerk.guard';
+import type { Request } from 'express';
 
 @ApiTags('Suscripciones')
-@Controller('suscripcion')
+@Controller('suscripciones')
 export class SuscripcionController {
   constructor(private readonly suscripcionService: SuscripcionService) {}
 
-  /*
+  @UseGuards(ClerkAuthGuard)
   @Post()
-  @ApiOperation({ summary: 'Crear una nueva suscripción' })
-  @ApiBody({ type: CreateSuscripcionDto })
+  @ApiOperation({
+    summary: 'Crear una nueva suscripción',
+    description: 'Crea una suscripción nueva para la empresa autenticada'
+  })
+  @ApiBody({ type: CreateSubscriptionRequestDto })
   @ApiResponse({
     status: 201,
     description: 'Suscripción creada exitosamente',
-    type: CreateSuscripcionDto
+    type: SubscriptionResponseDto
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'La empresa ya tiene una suscripción activa',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'La empresa ya tiene una suscripción activa.'
+        }
+      }
+    }
   })
   @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
-  create(@Body() createSuscripcionDto: CreateSuscripcionDto) {
-    return this.suscripcionService.create(createSuscripcionDto);
+  @ApiResponse({ status: 404, description: 'Plan no encontrado' })
+  async createSubscription(
+    @Body() createSubscriptionDto: CreateSubscriptionRequestDto,
+    @Req() req: Request
+  ): Promise<SubscriptionResponseDto> {
+    const companyId = req.user?.companyId;
+    if (!companyId) {
+      throw new Error('Usuario no autenticado o sin empresa');
+    }
+    return this.suscripcionService.createSubscription(
+      createSubscriptionDto,
+      companyId
+    );
   }
-    */
 
   @Get()
   @ApiOperation({ summary: 'Obtener todas las suscripciones' })

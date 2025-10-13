@@ -4,10 +4,14 @@ import { SuscripcionService } from './suscripcion.service';
 import { SuscripcionController } from './suscripcion.controller';
 import { Suscripcion } from './entities/suscripcion.entity';
 import { Plan } from '../plan/entities/plan.entity';
+import { Company } from '../empresa/entities/empresa.entity';
 import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Suscripcion, Plan]), NotificationsModule],
+  imports: [
+    TypeOrmModule.forFeature([Suscripcion, Plan, Company]),
+    NotificationsModule
+  ],
   controllers: [SuscripcionController],
   providers: [SuscripcionService],
   exports: [SuscripcionService]
