@@ -22,15 +22,16 @@ import {
 } from '@nestjs/swagger';
 import { NotificationType } from './entities/notification.entity';
 import type { Request } from 'express';
+import { ClerkGuard } from '../auth/clerk.guard';
 
 @ApiTags('Notificaciones')
 @Controller('notifications')
-// @UseGuards(Auth0DbGuard) // Temporalmente deshabilitado para testing
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Get()
   @ApiOperation({ summary: 'Obtener notificaciones del usuario' })
+  @useGuards(ClerkGuard)
   @ApiQuery({
     name: 'page',
     required: false,
@@ -69,6 +70,7 @@ export class NotificationsController {
   @Post('mark-read/:id')
   @ApiOperation({ summary: 'Marcar notificación como leída' })
   @ApiParam({ name: 'id', description: 'ID de la notificación' })
+  @useGuards(ClerkGuard)
   @ApiBody({
     schema: {
       type: 'object',
@@ -96,6 +98,7 @@ export class NotificationsController {
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar notificación' })
   @ApiParam({ name: 'id', description: 'ID de la notificación' })
+  @useGuards(ClerkGuard)
   @ApiBody({
     schema: {
       type: 'object',
@@ -122,6 +125,7 @@ export class NotificationsController {
 
   @Post('mark-all-read')
   @ApiOperation({ summary: 'Marcar todas las notificaciones como leídas' })
+  @useGuards(ClerkGuard)
   @ApiBody({
     schema: {
       type: 'object',
@@ -144,6 +148,7 @@ export class NotificationsController {
 
   @Delete('delete-all')
   @ApiOperation({ summary: 'Eliminar todas las notificaciones' })
+  @useGuards(ClerkGuard)
   @ApiBody({
     schema: {
       type: 'object',
@@ -166,6 +171,7 @@ export class NotificationsController {
 
   @Get('config')
   @ApiOperation({ summary: 'Obtener configuración de notificaciones' })
+  @useGuards(ClerkGuard)
   @ApiBody({
     schema: {
       type: 'object',
@@ -188,6 +194,7 @@ export class NotificationsController {
 
   @Put('config')
   @ApiOperation({ summary: 'Actualizar configuración de notificaciones' })
+  @useGuards(ClerkGuard)
   @ApiBody({
     schema: {
       type: 'object',
@@ -222,6 +229,7 @@ export class NotificationsController {
 
   @Post('create')
   @ApiOperation({ summary: 'Crear una notificación manual (para testing)' })
+  @useGuards(ClerkGuard)
   @ApiBody({
     schema: {
       type: 'object',
@@ -278,6 +286,7 @@ export class NotificationsController {
 
   @Post('schedule-reminder')
   @ApiOperation({ summary: 'Agendar un recordatorio personalizado' })
+  @useGuards(ClerkGuard)
   @ApiBody({
     schema: {
       type: 'object',
