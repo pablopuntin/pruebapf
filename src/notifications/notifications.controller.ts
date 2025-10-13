@@ -63,7 +63,10 @@ export class NotificationsController {
     @Query('limit') limit: number = 10,
     @Req() req: Request
   ) {
-    const userId = '21142141241';
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
     return this.notificationsService.findAll(userId, page, limit);
   }
 
@@ -320,7 +323,10 @@ export class NotificationsController {
       type?: string;
     }
   ) {
-    const userId = '21142141241';
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
     const scheduledDate = new Date(body.scheduledDate);
 
     return this.notificationsService.scheduleReminder(
