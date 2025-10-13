@@ -19,6 +19,7 @@ import { UserModule } from './user/user.module';
 import { AbsenceModule } from './absence/absence.module';
 import { ContactModule } from './contact/contact.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ChatModule } from './chat/chat.module';
 import { JWT_SECRET } from './config/envs';
 
 //--------------SEEDER----------------//
@@ -59,6 +60,7 @@ import { Position } from './position/entities/position.entity';
     AbsenceModule,
     ContactModule,
     NotificationsModule,
+    ChatModule,
     TypeOrmModule.forFeature([Plan, Rol, Departamento, Position])
   ],
   controllers: [AppController],

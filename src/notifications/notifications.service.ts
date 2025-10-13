@@ -2,7 +2,8 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cron } from '@nestjs/schedule';
-import * as nodemailer from 'nodemailer';
+import { ConfigService } from '@nestjs/config';
+import sgMail from '@sendgrid/mail';
 import { User } from '../user/entities/user.entity';
 import { Company } from '../empresa/entities/empresa.entity';
 import { Suscripcion } from '../suscripcion/entities/suscripcion.entity';
@@ -15,7 +16,7 @@ import { UpdateNotificationConfigDto } from './dto/update-notification-config.dt
 @Injectable()
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
-  private transporter: nodemailer.Transporter;
+  private readonly fromEmail: string;
 
   constructor(
     @InjectRepository(User)
@@ -30,22 +31,13 @@ export class NotificationsService {
     private notificationRepository: Repository<Notification>,
     @InjectRepository(NotificationConfig)
     private configRepository: Repository<NotificationConfig>,
-    private notificationsGateway: NotificationsGateway
+    private notificationsGateway: NotificationsGateway,
+    private configService: ConfigService
   ) {
-    this.createTransporter();
+    sgMail.setApiKey(this.configService.get<string>('SENDGRID_API_KEY')!);
+    this.fromEmail = this.configService.get<string>('SENDGRID_FROM')!;
   }
 
-  private createTransporter() {
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587') || 587,
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER || '',
-        pass: process.env.SMTP_PASS || ''
-      }
-    });
-  }
 
   // 🔔 CRON: Verificar suscripciones que expiran en 7 días
   @Cron('0 9 * * *') // Todos los días a las 9:00 AM
@@ -252,7 +244,7 @@ export class NotificationsService {
 
     // Enviar email
     const mailOptions = {
-      from: process.env.SMTP_USER,
+      from: this.fromEmail,
       to: company.email,
       subject: `⚠️ Tu suscripción ${plan.name} expira en 7 días`,
       html: `
@@ -275,7 +267,7 @@ export class NotificationsService {
     };
 
     try {
-      await this.transporter.sendMail(mailOptions);
+      await sgMail.send(mailOptions);
       this.logger.log(
         `📧 Notificación de expiración enviada a ${company.email}`
       );
@@ -302,7 +294,7 @@ export class NotificationsService {
 
     // Enviar email
     const mailOptions = {
-      from: process.env.SMTP_USER,
+      from: this.fromEmail,
       to: company.email,
       subject: `🚫 Tu suscripción ${plan.name} ha expirado`,
       html: `
@@ -321,7 +313,7 @@ export class NotificationsService {
     };
 
     try {
-      await this.transporter.sendMail(mailOptions);
+      await sgMail.send(mailOptions);
       this.logger.log(
         `📧 Notificación de expiración enviada a ${company.email}`
       );
@@ -347,7 +339,7 @@ export class NotificationsService {
 
     // Enviar email
     const mailOptions = {
-      from: process.env.SMTP_USER,
+      from: this.fromEmail,
       to: company.email,
       subject: `🎉 ¡Feliz cumpleaños ${employee.first_name}!`,
       html: `
@@ -370,7 +362,7 @@ export class NotificationsService {
     };
 
     try {
-      await this.transporter.sendMail(mailOptions);
+      await sgMail.send(mailOptions);
       this.logger.log(
         `🎂 Notificación de cumpleaños enviada para ${employee.first_name} ${employee.last_name}`
       );
@@ -403,7 +395,7 @@ export class NotificationsService {
 
         // Enviar email
         const mailOptions = {
-          from: process.env.SMTP_USER,
+          from: this.fromEmail,
           to: company.email,
           subject: `🎊 Recordatorio de feriado: ${isHoliday.name}`,
           html: `
@@ -426,7 +418,7 @@ export class NotificationsService {
         };
 
         try {
-          await this.transporter.sendMail(mailOptions);
+          await sgMail.send(mailOptions);
           this.logger.log(
             `🎊 Notificación de feriado enviada a ${company.email}`
           );
@@ -639,3 +631,4 @@ export class NotificationsService {
     return await this.configRepository.save(config);
   }
 }
+
