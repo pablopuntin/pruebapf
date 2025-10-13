@@ -228,7 +228,7 @@
 // }
 
 //uso del guard authuser con clerk
-import {
+ import {
   Controller,
   Get,
   Post,
@@ -269,8 +269,10 @@ export class EmpleadoController {
   })
   @ApiBody({ type: CreateEmployeeDto })
   @ApiResponse({ status: 201, description: 'Empleado creado exitosamente' })
+  // async create(@AuthUser() user: any, @Body() dto: CreateEmployeeDto) {
+  //   return this.empleadoService.create(dto, user);
   async create(@AuthUser() user: any, @Body() dto: CreateEmployeeDto) {
-    return this.empleadoService.create(dto, user);
+  return this.empleadoService.create(dto, user);
   }
 
   // ✅ Obtener todos los empleados
