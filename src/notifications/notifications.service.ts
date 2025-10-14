@@ -522,12 +522,23 @@ export class NotificationsService {
 
   // Crear notificación en BD
   async createNotification(
-    userId: string,
+    userIdOrCompanyId: string,
     title: string,
     message: string,
     type: NotificationType
   ) {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+    // Buscar usuario por ID o por company.id
+    let user = await this.userRepository.findOne({
+      where: { id: userIdOrCompanyId }
+    });
+
+    // Si no se encuentra por ID, buscar por company.id
+    if (!user) {
+      user = await this.userRepository.findOne({
+        where: { company: { id: userIdOrCompanyId } }
+      });
+    }
+
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
     }
@@ -546,7 +557,7 @@ export class NotificationsService {
 
     // Enviar notificación en tiempo real
     await this.notificationsGateway.sendNotificationToUser(
-      userId,
+      user.id,
       savedNotification
     );
 
