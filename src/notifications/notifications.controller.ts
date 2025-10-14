@@ -94,9 +94,13 @@ export class NotificationsController {
   @ApiResponse({ status: 404, description: 'Notificación no encontrada' })
   async markAsRead(
     @Param('id') notificationId: string,
-    @Body('userId') userId: string
+    @Req() req: Request
   ) {
-    return this.notificationsService.markAsRead(notificationId, userId);
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
+    return this.notificationsService.markAsRead(userId, notificationId);
   }
 
   @UseGuards(ClerkAuthGuard)
