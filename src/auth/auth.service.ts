@@ -433,7 +433,9 @@ export class AuthService {
         const savedCompany = await manager.save(Company, company);
 
         if (!savedCompany) {
-          throw new NotFoundException('Error, Company not found after register.');
+          throw new NotFoundException(
+            'Error, Company not found after register.'
+          );
         }
 
         //Encontrar el Plan en la DB
@@ -498,7 +500,6 @@ export class AuthService {
         return {
           message: 'Register successfully.'
         };
-
       } catch (error) {
         // Si cualquier paso falla, TODO se revierte automáticamente
         console.error('Error en registro:', error);
@@ -522,29 +523,5 @@ export class AuthService {
       message: 'User loguin.',
       user: userLogin
     };
-  }
-
-  //-------------Perfil de usuario y JWT-------------//
-  async getUserWithJwt(email: string) {
-    const userLogin = await this.usersRepository.findOne({
-      where: { email },
-      relations: { company: true, role: true }
-    });
-
-    if (!userLogin) {
-      throw new NotFoundException('User not found in DB.');
-    }
-
-    const payload = {
-      id: userLogin.id,
-      email: userLogin.email,
-      name: userLogin.first_name,
-      rol: userLogin.role.name,
-      companyId: userLogin.company.id
-    };
-
-    const appToken = this.jwtService.sign(payload);
-
-    return { user: userLogin, appToken };
   }
 }

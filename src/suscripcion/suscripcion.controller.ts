@@ -23,6 +23,7 @@ import {
 } from '@nestjs/swagger';
 import { ClerkAuthGuard } from '../auth/guards/clerk.guard';
 import type { Request } from 'express';
+import type { AuthRequest } from 'src/interfaces/authrequest.interface';
 
 @ApiTags('Suscripciones')
 @Controller('suscripciones')
@@ -79,6 +80,50 @@ export class SuscripcionController {
   })
   findAll() {
     return this.suscripcionService.findAll();
+  }
+
+  //-----Encontrar todas las suscripciones de una empresa---//
+  @UseGuards(ClerkAuthGuard)
+  @Get('company')
+  @ApiOperation({
+    summary: 'Suscripciones de una empresa.',
+    description:
+      'Devuelve todas las suscripciones de una empresa en particular.'
+  })
+  @ApiResponse({ status: 200, description: 'Suscriptions found' })
+  async getCompanySuscriptions(@Req() req: AuthRequest) {
+    const { companyId } = req.user;
+    return this.suscripcionService.getCompanySuscriptions(companyId);
+  }
+
+  //-----Encontrar la suscripcion actual de una empresa---//
+  @UseGuards(ClerkAuthGuard)
+  @Get('company/current')
+  @ApiOperation({
+    summary: 'Suscripcion actual de una empresa.',
+    description: 'Devuelve la suscripcion actual de una empresa en particular.'
+  })
+  @ApiResponse({ status: 200, description: 'Current Suscription found' })
+  async getCompanyCurrentSuscription(@Req() req: AuthRequest) {
+    const { companyId } = req.user;
+    return this.suscripcionService.getCompanyCurrentSuscription(companyId);
+  }
+
+  //-----Añadir/"cambiar" la suscripcion actual de la empresa---//
+  @UseGuards(ClerkAuthGuard)
+  @Post('/company')
+  @ApiOperation({
+    summary: 'Añadir/"cambiar" suscripcion actual de una empresa.',
+    description:
+      'Añade una suscripcion nueva a la empresa, que comenzará una vez termine la suscripcion actual.'
+  })
+  @ApiResponse({ status: 201, description: 'Suscription Changed.' })
+  async addCompanySuscription(
+    @Req() req: AuthRequest,
+    @Body() planId: CreateSubscriptionRequestDto
+  ) {
+    const { companyId } = req.user;
+    return this.suscripcionService.addCompanySuscription(companyId, planId);
   }
 
   @Get(':id')

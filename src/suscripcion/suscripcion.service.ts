@@ -4,7 +4,7 @@ import {
   NotFoundException
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { UpdateSuscripcionDto } from './dto/update-suscripcion.dto';
 import { Suscripcion } from './entities/suscripcion.entity';
 import { CreateSuscripcionDto } from './dto/create-suscripcion.dto';
@@ -119,6 +119,110 @@ export class SuscripcionService {
       relations: ['company', 'plan'],
       order: { start_date: 'DESC' }
     });
+  }
+
+  //-----Encontrar todas las suscripciones de una empresa---//
+  async getCompanySuscriptions(companyId: string) {
+    const suscriptions: Suscripcion[] = await this.suscripcionRepository.find({
+      where: { company: { id: companyId } },
+      relations: ['company', 'plan']
+    });
+
+    return {
+      message: 'Suscripcions found.',
+      suscriptions: suscriptions
+    };
+  }
+
+  //-----Encontrar la suscripcion actual de una empresa---//
+  async getCompanyCurrentSuscription(companyId: string) {
+    const currentDate = new Date();
+
+    const activeSuscription = await this.suscripcionRepository.findOne({
+      where: {
+        company: { id: companyId },
+        // Filtra donde la fecha de inicio es <= a la fecha actual
+        start_date: LessThanOrEqual(currentDate),
+        // Y la fecha de fin es >= a la fecha actual
+        end_date: MoreThanOrEqual(currentDate)
+      },
+      relations: ['company', 'plan']
+    });
+
+    if (activeSuscription) {
+      return {
+        message: 'Current Suscripcion found.',
+        suscripcion: activeSuscription
+      };
+    } else {
+      throw new NotFoundException('No se encontró suscripcion activa.');
+    }
+  }
+
+  //-----Añadir/"cambiar" la suscripcion actual de la empresa---//
+  async addCompanySuscription(
+    companyId: string,
+    CreateSuscription: CreateSubscriptionRequestDto
+  ) {
+    const currentDate = new Date();
+
+    //Buscar el plan nuevo en la DB
+    const plan = await this.planRepository.findOne({
+      where: { id: CreateSuscription.plan_id }
+    });
+
+    if (!plan) {
+      throw new NotFoundException('Plan not found.');
+    }
+
+    //Encontrar la suscripcion activa
+    const activeSuscription = await this.suscripcionRepository.findOne({
+      where: {
+        company: { id: companyId },
+        // Filtra donde la fecha de inicio es <= a la fecha actual
+        start_date: LessThanOrEqual(currentDate),
+        // Y la fecha de fin es >= a la fecha actual
+        end_date: MoreThanOrEqual(currentDate)
+      }
+    });
+
+    if (!activeSuscription) {
+      throw new NotFoundException('Current Suscription not found.');
+    }
+
+    //Encontrar la empresa:
+    const company = await this.companyRepository.findOne({
+      where: { id: companyId }
+    });
+
+    if (!company) {
+      throw new NotFoundException('Current Company not found');
+    }
+
+    //Nueva fecha de inicio
+    const newStartDate = new Date(activeSuscription.end_date);
+    newStartDate.setDate(newStartDate.getDate() + 1);
+
+    //Nueva fecha de fin
+    const newEndDate = new Date(newStartDate);
+
+    const durationDays = plan.duration_days;
+    newEndDate.setDate(newEndDate.getDate() + durationDays - 1);
+
+    //Añadir nueva suscripcion
+    const newSuscription = new Suscripcion();
+    newSuscription.start_date = newStartDate;
+    newSuscription.end_date = newEndDate;
+    newSuscription.plan = plan;
+    newSuscription.company = company;
+
+    const savedSuscription =
+      await this.suscripcionRepository.save(newSuscription);
+
+    return {
+      message: 'Suscripcion Changed.',
+      suscripcion: savedSuscription
+    };
   }
 
   async findOne(id: string): Promise<Suscripcion> {
