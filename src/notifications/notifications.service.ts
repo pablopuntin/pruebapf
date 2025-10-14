@@ -527,15 +527,10 @@ export class NotificationsService {
     message: string,
     type: NotificationType
   ) {
-    console.log('🔍 [DEBUG] Creando notificación:', { userId, title, type });
-    
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
-      console.log('❌ [DEBUG] Usuario no encontrado:', userId);
       throw new NotFoundException('Usuario no encontrado');
     }
-
-    console.log('📝 [DEBUG] Usuario encontrado:', { id: user.id, email: user.email });
 
     const notification = this.notificationRepository.create({
       title,
@@ -548,12 +543,6 @@ export class NotificationsService {
 
     const savedNotification =
       await this.notificationRepository.save(notification);
-    
-    console.log('✅ [DEBUG] Notificación creada y guardada:', {
-      id: savedNotification.id,
-      title: savedNotification.title,
-      user_id: savedNotification.user_id
-    });
 
     // Enviar notificación en tiempo real
     await this.notificationsGateway.sendNotificationToUser(
@@ -567,8 +556,6 @@ export class NotificationsService {
   // Obtener notificaciones de un usuario
   async findAll(userId: string, page: number = 1, limit: number = 10) {
     try {
-      console.log('🔍 [DEBUG] Obteniendo notificaciones para userId:', userId);
-      
       const [notifications, total] =
         await this.notificationRepository.findAndCount({
           where: { user_id: userId, is_deleted: false },
@@ -576,17 +563,6 @@ export class NotificationsService {
           skip: (page - 1) * limit,
           take: limit
         });
-
-      console.log('📝 [DEBUG] Notificaciones encontradas:', {
-        total,
-        count: notifications.length,
-        notifications: notifications.map(n => ({
-          id: n.id,
-          title: n.title,
-          is_read: n.is_read,
-          created_at: n.created_at
-        }))
-      });
 
       return {
         notifications,
@@ -596,7 +572,6 @@ export class NotificationsService {
         totalPages: Math.ceil(total / limit)
       };
     } catch (error) {
-      console.log('❌ [DEBUG] Error obteniendo notificaciones:', error);
       this.logger.error('Error obteniendo notificaciones:', error);
       throw error;
     }
@@ -604,32 +579,16 @@ export class NotificationsService {
 
   // Marcar notificación como leída
   async markAsRead(userId: string, notificationId: string) {
-    console.log('🔍 [DEBUG] Marcando como leída:', { userId, notificationId });
-    
     const notification = await this.notificationRepository.findOne({
       where: { id: notificationId, user_id: userId }
     });
 
     if (!notification) {
-      console.log('❌ [DEBUG] Notificación no encontrada');
       throw new NotFoundException('Notificación no encontrada');
     }
 
-    console.log('📝 [DEBUG] Notificación encontrada:', {
-      id: notification.id,
-      title: notification.title,
-      is_read: notification.is_read
-    });
-
     notification.is_read = true;
-    const saved = await this.notificationRepository.save(notification);
-    
-    console.log('✅ [DEBUG] Notificación guardada:', {
-      id: saved.id,
-      is_read: saved.is_read
-    });
-    
-    return saved;
+    return await this.notificationRepository.save(notification);
   }
 
   // Eliminar notificación
