@@ -232,63 +232,6 @@ export class NotificationsController {
   }
 
   @UseGuards(ClerkAuthGuard)
-  @Post('create')
-  @ApiOperation({ summary: 'Crear una notificación manual (para testing)' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', example: 'Notificación de prueba' },
-        message: {
-          type: 'string',
-          example: 'Esta es una notificación de prueba'
-        },
-        type: {
-          type: 'string',
-          enum: [
-            'employee_added',
-            'payroll_processed',
-            'productivity_report',
-            'category_update',
-            'evaluation_reminder',
-            'holiday_reminder',
-            'subscription_expiring',
-            'subscription_expired',
-            'birthday_reminder',
-            'custom_notification'
-          ],
-          example: 'custom_notification'
-        },
-        userId: {
-          type: 'string',
-          example: '123e4567-e89b-12d3-a456-426614174000'
-        }
-      },
-      required: ['title', 'message', 'type', 'userId']
-    }
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Notificación creada exitosamente.'
-  })
-  async createNotification(
-    @Body()
-    body: {
-      title: string;
-      message: string;
-      type: string;
-      userId: string;
-    }
-  ) {
-    return this.notificationsService.createNotification(
-      body.userId,
-      body.title,
-      body.message,
-      body.type as any
-    );
-  }
-
-  @UseGuards(ClerkAuthGuard)
   @Post('simple')
   @ApiOperation({
     summary: 'Crear notificación simple (formato frontend)',

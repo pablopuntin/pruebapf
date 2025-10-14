@@ -139,11 +139,14 @@ export class NotificationsService {
   }
 
   // 🔔 MÉTODOS PÚBLICOS PARA EVENTOS EN TIEMPO REAL
-  
   // 👤 Notificar empleado agregado
-  async notifyEmployeeAdded(companyId: string, employeeName: string, position?: string) {
+  async notifyEmployeeAdded(
+    companyId: string,
+    employeeName: string,
+    position?: string
+  ) {
     this.logger.log(`👤 Notificando empleado agregado: ${employeeName}`);
-    
+
     await this.createNotification(
       companyId,
       '👤 Nuevo empleado agregado',
@@ -153,9 +156,13 @@ export class NotificationsService {
   }
 
   // 💰 Notificar nómina procesada
-  async notifyPayrollProcessed(companyId: string, period: string, totalEmployees: number) {
+  async notifyPayrollProcessed(
+    companyId: string,
+    period: string,
+    totalEmployees: number
+  ) {
     this.logger.log(`💰 Notificando nómina procesada para período: ${period}`);
-    
+
     await this.createNotification(
       companyId,
       '💰 Nómina procesada',
@@ -165,9 +172,13 @@ export class NotificationsService {
   }
 
   // 📊 Notificar reporte de productividad
-  async notifyProductivityReport(companyId: string, reportType: string, period: string) {
+  async notifyProductivityReport(
+    companyId: string,
+    reportType: string,
+    period: string
+  ) {
     this.logger.log(`📊 Notificando reporte de productividad: ${reportType}`);
-    
+
     await this.createNotification(
       companyId,
       '📊 Reporte de productividad disponible',
@@ -177,9 +188,15 @@ export class NotificationsService {
   }
 
   // 📝 Notificar actualización de categoría
-  async notifyCategoryUpdate(companyId: string, categoryName: string, action: string) {
-    this.logger.log(`📝 Notificando actualización de categoría: ${categoryName}`);
-    
+  async notifyCategoryUpdate(
+    companyId: string,
+    categoryName: string,
+    action: string
+  ) {
+    this.logger.log(
+      `📝 Notificando actualización de categoría: ${categoryName}`
+    );
+
     await this.createNotification(
       companyId,
       '📝 Categoría actualizada',
@@ -189,9 +206,15 @@ export class NotificationsService {
   }
 
   // 📋 Notificar recordatorio de evaluación
-  async notifyEvaluationReminder(companyId: string, employeeName: string, evaluationType: string) {
-    this.logger.log(`📋 Notificando recordatorio de evaluación: ${employeeName}`);
-    
+  async notifyEvaluationReminder(
+    companyId: string,
+    employeeName: string,
+    evaluationType: string
+  ) {
+    this.logger.log(
+      `📋 Notificando recordatorio de evaluación: ${employeeName}`
+    );
+
     await this.createNotification(
       companyId,
       '📋 Recordatorio de evaluación',
@@ -504,10 +527,15 @@ export class NotificationsService {
     message: string,
     type: NotificationType
   ) {
+    console.log('🔍 [DEBUG] Creando notificación:', { userId, title, type });
+    
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
+      console.log('❌ [DEBUG] Usuario no encontrado:', userId);
       throw new NotFoundException('Usuario no encontrado');
     }
+
+    console.log('📝 [DEBUG] Usuario encontrado:', { id: user.id, email: user.email });
 
     const notification = this.notificationRepository.create({
       title,
@@ -520,6 +548,12 @@ export class NotificationsService {
 
     const savedNotification =
       await this.notificationRepository.save(notification);
+    
+    console.log('✅ [DEBUG] Notificación creada y guardada:', {
+      id: savedNotification.id,
+      title: savedNotification.title,
+      user_id: savedNotification.user_id
+    });
 
     // Enviar notificación en tiempo real
     await this.notificationsGateway.sendNotificationToUser(
@@ -533,6 +567,8 @@ export class NotificationsService {
   // Obtener notificaciones de un usuario
   async findAll(userId: string, page: number = 1, limit: number = 10) {
     try {
+      console.log('🔍 [DEBUG] Obteniendo notificaciones para userId:', userId);
+      
       const [notifications, total] =
         await this.notificationRepository.findAndCount({
           where: { user_id: userId, is_deleted: false },
@@ -540,6 +576,17 @@ export class NotificationsService {
           skip: (page - 1) * limit,
           take: limit
         });
+
+      console.log('📝 [DEBUG] Notificaciones encontradas:', {
+        total,
+        count: notifications.length,
+        notifications: notifications.map(n => ({
+          id: n.id,
+          title: n.title,
+          is_read: n.is_read,
+          created_at: n.created_at
+        }))
+      });
 
       return {
         notifications,
@@ -549,6 +596,7 @@ export class NotificationsService {
         totalPages: Math.ceil(total / limit)
       };
     } catch (error) {
+      console.log('❌ [DEBUG] Error obteniendo notificaciones:', error);
       this.logger.error('Error obteniendo notificaciones:', error);
       throw error;
     }
@@ -556,16 +604,32 @@ export class NotificationsService {
 
   // Marcar notificación como leída
   async markAsRead(userId: string, notificationId: string) {
+    console.log('🔍 [DEBUG] Marcando como leída:', { userId, notificationId });
+    
     const notification = await this.notificationRepository.findOne({
       where: { id: notificationId, user_id: userId }
     });
 
     if (!notification) {
+      console.log('❌ [DEBUG] Notificación no encontrada');
       throw new NotFoundException('Notificación no encontrada');
     }
 
+    console.log('📝 [DEBUG] Notificación encontrada:', {
+      id: notification.id,
+      title: notification.title,
+      is_read: notification.is_read
+    });
+
     notification.is_read = true;
-    return await this.notificationRepository.save(notification);
+    const saved = await this.notificationRepository.save(notification);
+    
+    console.log('✅ [DEBUG] Notificación guardada:', {
+      id: saved.id,
+      is_read: saved.is_read
+    });
+    
+    return saved;
   }
 
   // Eliminar notificación
