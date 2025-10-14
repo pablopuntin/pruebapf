@@ -220,6 +220,7 @@ import {
   NotFoundException,
   InternalServerErrorException
 } from '@nestjs/common';
+import { AuthenticatedUser } from 'src/interfaces/authenticated-user.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Employee } from './entities/empleado.entity';
@@ -250,13 +251,13 @@ export class EmpleadoService {
   // ---- Crear empleado (multi-tenant con Clerk) ----
   async create(
     createEmployeeDto: CreateEmployeeDto,
-    user: any
+    user: AuthenticatedUser
   ): Promise<Employee> {
     try {
       const employee = this.employeeRepository.create({
         ...createEmployeeDto,
         company: { id: user.companyId }, // <- Clerk usa companyId, no company object
-        user: { id: user.id }            // <- relación con usuario autenticado
+        user: { id: user.id } // <- relación con usuario autenticado
       });
 
       const savedEmployee = await this.employeeRepository.save(employee);
@@ -280,7 +281,9 @@ export class EmpleadoService {
   }
 
   // ---- Listar todos ----
-  async findAll(user: any): Promise<(Employee & { age?: number })[]> {
+  async findAll(
+    user: AuthenticatedUser
+  ): Promise<(Employee & { age?: number })[]> {
     if (!user.companyId) {
       throw new InternalServerErrorException('User has no associated company');
     }
@@ -297,7 +300,10 @@ export class EmpleadoService {
   }
 
   // ---- Buscar uno ----
-  async findOne(id: string, user: any): Promise<Employee & { age?: number }> {
+  async findOne(
+    id: string,
+    user: AuthenticatedUser
+  ): Promise<Employee & { age?: number }> {
     if (!user.companyId) {
       throw new InternalServerErrorException('User has no associated company');
     }
@@ -312,12 +318,14 @@ export class EmpleadoService {
 
     return {
       ...employee,
-      age: employee.birthdate ? this.calculateAge(employee.birthdate) : undefined
+      age: employee.birthdate
+        ? this.calculateAge(employee.birthdate)
+        : undefined
     };
   }
 
   // ---- Buscar por filtros ----
-  async search(user: any, searchDto: SearchEmpleadoDto) {
+  async search(user: AuthenticatedUser, searchDto: SearchEmpleadoDto) {
     if (!user.companyId) {
       throw new InternalServerErrorException('User has no associated company');
     }
@@ -335,7 +343,9 @@ export class EmpleadoService {
     });
 
     if (!employees.length) {
-      throw new NotFoundException('No se encontraron empleados con esos criterios');
+      throw new NotFoundException(
+        'No se encontraron empleados con esos criterios'
+      );
     }
 
     return employees.map((emp) => ({
@@ -345,7 +355,11 @@ export class EmpleadoService {
   }
 
   // ---- Actualizar ----
-  async update(id: string, dto: UpdateEmployeeDto, user: any): Promise<Employee> {
+  async update(
+    id: string,
+    dto: UpdateEmployeeDto,
+    user: AuthenticatedUser
+  ): Promise<Employee> {
     if (!user.companyId) {
       throw new InternalServerErrorException('User has no associated company');
     }
@@ -358,7 +372,7 @@ export class EmpleadoService {
   }
 
   // ---- Eliminar ----
-  async remove(id: string, user: any): Promise<void> {
+  async remove(id: string, user: AuthenticatedUser): Promise<void> {
     if (!user.companyId) {
       throw new InternalServerErrorException('User has no associated company');
     }
@@ -372,7 +386,7 @@ export class EmpleadoService {
   // ---- Ausencias ----
   async getAusenciasByEmpleado(
     employeeId: string,
-    user: any,
+    user: AuthenticatedUser,
     month?: number,
     year?: number
   ): Promise<Absence[]> {
