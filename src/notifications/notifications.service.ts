@@ -48,7 +48,7 @@ export class NotificationsService {
   }
 
   // 🔔 CRON: Verificar suscripciones que expiran en 7 días
-  @Cron('0 9 * * *') // Todos los días a las 9:00 AM
+  @Cron('22 11 * * *') // Todos los días a las 11:22 AM
   async checkExpiringSubscriptions() {
     this.logger.log('🔍 Verificando suscripciones que expiran en 7 días...');
 
@@ -74,7 +74,7 @@ export class NotificationsService {
   }
 
   // 🔔 CRON: Verificar suscripciones expiradas
-  @Cron('0 10 * * *') // Todos los días a las 10:00 AM
+  @Cron('22 11 * * *') // Todos los días a las 11:22 AM
   async checkExpiredSubscriptions() {
     this.logger.log('🔍 Verificando suscripciones expiradas...');
 
@@ -98,7 +98,7 @@ export class NotificationsService {
   }
 
   // 🔔 CRON: Recordatorio de cumpleaños
-  @Cron('0 8 * * *') // Todos los días a las 8:00 AM
+  @Cron('22 11 * * *') // Todos los días a las 11:22 AM
   async checkBirthdays() {
     this.logger.log('🎂 Verificando cumpleaños de empleados...');
 
@@ -123,7 +123,7 @@ export class NotificationsService {
   }
 
   // 🔔 CRON: Recordatorios de feriados
-  @Cron('0 7 * * *') // Todos los días a las 7:00 AM
+  @Cron('22 11 * * *') // Todos los días a las 11:22 AM
   async checkHolidays() {
     this.logger.log('🎊 Verificando feriados...');
 
