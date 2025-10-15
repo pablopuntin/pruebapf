@@ -3,14 +3,19 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
-import { config as auth0Config } from './config/auth0.config';
-import { auth } from 'express-openid-connect';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  //Configuracion de Auth0
-  app.use(auth(auth0Config));
+  app.enableCors({
+    origin: [
+      'https://front-one-umber.vercel.app',
+      'https://front-git-main-hr-systems-projects.vercel.app', // ← agregá este
+      'http://localhost:3000'
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true
+  });
 
   // Activar validación global
   app.useGlobalPipes(
@@ -20,14 +25,6 @@ async function bootstrap() {
       transform: true // transforma tipos automáticamente (ej: string -> number)
     })
   );
-  app.enableCors({
-    origin: [
-      'https://front-one-umber.vercel.app/', // tu dominio de Vercel
-      'http://localhost:3000' // para pruebas locales
-    ],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-  });
 
   const configService = app.get(ConfigService);
 
