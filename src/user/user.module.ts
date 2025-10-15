@@ -10,6 +10,7 @@ import { Employee } from 'src/empleado/entities/empleado.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([User, Rol, Company, Employee])],
   controllers: [UserController],
-  providers: [UserService]
+  providers: [UserService],
+  exports: [UserService]
 })
 export class UserModule {}

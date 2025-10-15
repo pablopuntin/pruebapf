@@ -11,7 +11,7 @@ import {
   Req
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-import { Auth0DbGuard } from '../auth/guards/auth0db.guard';
+import { ClerkAuthGuard } from '../auth/guards/clerk.guard';
 import {
   ApiTags,
   ApiOperation,
@@ -20,15 +20,16 @@ import {
   ApiQuery,
   ApiBody
 } from '@nestjs/swagger';
-import { NotificationType } from './entities/notification.entity';
 import type { Request } from 'express';
+import { AuthenticatedUser } from '../interfaces/authenticated-user.interface';
 
 @ApiTags('Notificaciones')
 @Controller('notifications')
-// @UseGuards(Auth0DbGuard) // Temporalmente deshabilitado para testing
+@UseGuards(ClerkAuthGuard)
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
+  @UseGuards(ClerkAuthGuard)
   @Get()
   @ApiOperation({ summary: 'Obtener notificaciones del usuario' })
   @ApiQuery({
@@ -60,12 +61,13 @@ export class NotificationsController {
   async getNotifications(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-    @Req() req: Request
+    @Req() req: Request & { user: AuthenticatedUser }
   ) {
-    const userId = req.oidc?.user?.sub;
+    const userId = req.user.id;
     return this.notificationsService.findAll(userId, page, limit);
   }
 
+  @UseGuards(ClerkAuthGuard)
   @Post('mark-read/:id')
   @ApiOperation({ summary: 'Marcar notificación como leída' })
   @ApiParam({ name: 'id', description: 'ID de la notificación' })
@@ -93,6 +95,7 @@ export class NotificationsController {
     return this.notificationsService.markAsRead(notificationId, userId);
   }
 
+  @UseGuards(ClerkAuthGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar notificación' })
   @ApiParam({ name: 'id', description: 'ID de la notificación' })
@@ -120,6 +123,7 @@ export class NotificationsController {
     return this.notificationsService.remove(userId, notificationId);
   }
 
+  @UseGuards(ClerkAuthGuard)
   @Post('mark-all-read')
   @ApiOperation({ summary: 'Marcar todas las notificaciones como leídas' })
   @ApiBody({
@@ -142,6 +146,7 @@ export class NotificationsController {
     return this.notificationsService.markAllAsRead(userId);
   }
 
+  @UseGuards(ClerkAuthGuard)
   @Delete('delete-all')
   @ApiOperation({ summary: 'Eliminar todas las notificaciones' })
   @ApiBody({
@@ -164,6 +169,7 @@ export class NotificationsController {
     return this.notificationsService.deleteAll(userId);
   }
 
+  @UseGuards(ClerkAuthGuard)
   @Get('config')
   @ApiOperation({ summary: 'Obtener configuración de notificaciones' })
   @ApiBody({
@@ -186,6 +192,7 @@ export class NotificationsController {
     return this.notificationsService.getNotificationConfig(userId);
   }
 
+  @UseGuards(ClerkAuthGuard)
   @Put('config')
   @ApiOperation({ summary: 'Actualizar configuración de notificaciones' })
   @ApiBody({
@@ -220,6 +227,7 @@ export class NotificationsController {
     return this.notificationsService.updateNotificationConfig(userId, config);
   }
 
+  @UseGuards(ClerkAuthGuard)
   @Post('create')
   @ApiOperation({ summary: 'Crear una notificación manual (para testing)' })
   @ApiBody({
@@ -276,6 +284,7 @@ export class NotificationsController {
     );
   }
 
+  @UseGuards(ClerkAuthGuard)
   @Post('schedule-reminder')
   @ApiOperation({ summary: 'Agendar un recordatorio personalizado' })
   @ApiBody({
@@ -302,7 +311,7 @@ export class NotificationsController {
     description: 'Recordatorio agendado exitosamente.'
   })
   async scheduleReminder(
-    @Req() req: Request,
+    @Req() req: Request & { user: AuthenticatedUser },
     @Body()
     body: {
       title: string;
@@ -311,7 +320,7 @@ export class NotificationsController {
       type?: string;
     }
   ) {
-    const userId = req.oidc?.user?.sub;
+    const userId = req.user.id;
     const scheduledDate = new Date(body.scheduledDate);
 
     return this.notificationsService.scheduleReminder(

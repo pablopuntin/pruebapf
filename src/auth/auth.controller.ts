@@ -7,10 +7,11 @@ import {
   Res,
   UseGuards
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
 import { CreateRegisterDto } from './dto/create-register.dto';
 import type { Request, Response } from 'express';
-import { Auth0DbGuard } from './guards/auth0db.guard';
+import { ClerkAuthGuard } from './guards/clerk.guard';
+import type { AuthRequest } from 'src/interfaces/authrequest.interface';
+import { AuthService } from './auth.service';
 
 @Controller()
 export class AuthController {
