@@ -37,27 +37,57 @@ export class NotificationsService {
 
   private initializeSendGrid() {
     if (!SENDGRID_API_KEY) {
-      this.logger.warn('SENDGRID_API_KEY not found. Email functionality will be disabled.');
+      this.logger.warn(
+        'SENDGRID_API_KEY no encontrada. La funcionalidad de email estará deshabilitada.'
+      );
       return;
     }
-    sgMail.setApiKey(SENDGRID_API_KEY);
-    this.logger.log('SendGrid initialized successfully');
+    
+    try {
+      // Intentar configurar la API key usando el método tradicional
+      if (typeof sgMail.setApiKey === 'function') {
+        sgMail.setApiKey(SENDGRID_API_KEY);
+      } else {
+        // Si setApiKey no está disponible, configurar directamente en el objeto
+        (sgMail as any).apiKey = SENDGRID_API_KEY;
+      }
+      this.logger.log('SendGrid inicializado correctamente');
+    } catch (error) {
+      this.logger.error('Error inicializando SendGrid:', error);
+    }
   }
 
-  private async sendEmail(to: string, subject: string, html: string, text?: string) {
+  private async sendEmail(
+    to: string,
+    subject: string,
+    html: string,
+    text?: string
+  ) {
     try {
+      // Asegurar que la API key esté configurada antes de enviar
+      if (!SENDGRID_API_KEY) {
+        throw new Error('SENDGRID_API_KEY no está configurada');
+      }
+
       const msg = {
         to,
         from: SENDGRID_FROM || 'noreply@tuempresa.com',
         subject,
         text: text || html.replace(/<[^>]*>/g, ''), // Convert HTML to plain text
-        html,
+        html
       };
-      
+
+      // Configurar la API key si no está configurada
+      if (typeof sgMail.setApiKey === 'function') {
+        sgMail.setApiKey(SENDGRID_API_KEY);
+      } else if (!(sgMail as any).apiKey) {
+        (sgMail as any).apiKey = SENDGRID_API_KEY;
+      }
+
       await sgMail.send(msg);
-      this.logger.log(`📧 Email sent successfully to ${to}`);
+      this.logger.log(`📧 Email enviado exitosamente a ${to}`);
     } catch (error) {
-      this.logger.error(`❌ Failed to send email to ${to}:`, error);
+      this.logger.error(`❌ Error enviando email a ${to}:`, error);
       throw error;
     }
   }
