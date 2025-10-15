@@ -2,7 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cron } from '@nestjs/schedule';
-import * as nodemailer from 'nodemailer';
+import * as sgMail from '@sendgrid/mail';
 import { User } from '../user/entities/user.entity';
 import { Company } from '../empresa/entities/empresa.entity';
 import { Suscripcion } from '../suscripcion/entities/suscripcion.entity';
@@ -11,11 +11,11 @@ import { Notification, NotificationType } from './entities/notification.entity';
 import { NotificationConfig } from './entities/notification-config.entity';
 import { NotificationsGateway } from './notifications.gateway';
 import { UpdateNotificationConfigDto } from './dto/update-notification-config.dto';
+import { SENDGRID_API_KEY, SENDGRID_FROM } from '../config/envs';
 
 @Injectable()
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
-  private transporter: nodemailer.Transporter;
 
   constructor(
     @InjectRepository(User)
@@ -32,19 +32,34 @@ export class NotificationsService {
     private configRepository: Repository<NotificationConfig>,
     private notificationsGateway: NotificationsGateway
   ) {
-    this.createTransporter();
+    this.initializeSendGrid();
   }
 
-  private createTransporter() {
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587') || 587,
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER || '',
-        pass: process.env.SMTP_PASS || ''
-      }
-    });
+  private initializeSendGrid() {
+    if (!SENDGRID_API_KEY) {
+      this.logger.warn('SENDGRID_API_KEY not found. Email functionality will be disabled.');
+      return;
+    }
+    sgMail.setApiKey(SENDGRID_API_KEY);
+    this.logger.log('SendGrid initialized successfully');
+  }
+
+  private async sendEmail(to: string, subject: string, html: string, text?: string) {
+    try {
+      const msg = {
+        to,
+        from: SENDGRID_FROM || 'noreply@tuempresa.com',
+        subject,
+        text: text || html.replace(/<[^>]*>/g, ''), // Convert HTML to plain text
+        html,
+      };
+      
+      await sgMail.send(msg);
+      this.logger.log(`📧 Email sent successfully to ${to}`);
+    } catch (error) {
+      this.logger.error(`❌ Failed to send email to ${to}:`, error);
+      throw error;
+    }
   }
 
   // 🔔 CRON: Verificar suscripciones que expiran en 7 días
@@ -274,31 +289,27 @@ export class NotificationsService {
     );
 
     // Enviar email
-    const mailOptions = {
-      from: process.env.SMTP_USER,
-      to: company.email,
-      subject: `⚠️ Tu suscripción ${plan.name} expira en 7 días`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #e74c3c;">⚠️ Recordatorio de Expiración</h2>
-          <p>Hola <strong>${company.legal_name}</strong>,</p>
-          <p>Te informamos que tu suscripción al plan <strong>${plan.name}</strong> expirará en <strong>7 días</strong>.</p>
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3>Detalles de tu suscripción:</h3>
-            <ul>
-              <li><strong>Plan:</strong> ${plan.name}</li>
-              <li><strong>Precio:</strong> $${plan.price}</li>
-              <li><strong>Fecha de expiración:</strong> ${subscription.end_date.toLocaleDateString()}</li>
-            </ul>
-          </div>
-          <p>Para renovar tu suscripción, por favor contacta con nuestro equipo de soporte.</p>
-          <p>Saludos,<br>Equipo HR System</p>
+    const subject = `⚠️ Tu suscripción ${plan.name} expira en 7 días`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #e74c3c;">⚠️ Recordatorio de Expiración</h2>
+        <p>Hola <strong>${company.legal_name}</strong>,</p>
+        <p>Te informamos que tu suscripción al plan <strong>${plan.name}</strong> expirará en <strong>7 días</strong>.</p>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3>Detalles de tu suscripción:</h3>
+          <ul>
+            <li><strong>Plan:</strong> ${plan.name}</li>
+            <li><strong>Precio:</strong> $${plan.price}</li>
+            <li><strong>Fecha de expiración:</strong> ${subscription.end_date.toLocaleDateString()}</li>
+          </ul>
         </div>
-      `
-    };
+        <p>Para renovar tu suscripción, por favor contacta con nuestro equipo de soporte.</p>
+        <p>Saludos,<br>Equipo HR System</p>
+      </div>
+    `;
 
     try {
-      await this.transporter.sendMail(mailOptions);
+      await this.sendEmail(company.email, subject, html);
       this.logger.log(
         `📧 Notificación de expiración enviada a ${company.email}`
       );
@@ -324,27 +335,23 @@ export class NotificationsService {
     );
 
     // Enviar email
-    const mailOptions = {
-      from: process.env.SMTP_USER,
-      to: company.email,
-      subject: `🚫 Tu suscripción ${plan.name} ha expirado`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #e74c3c;">🚫 Suscripción Expirada</h2>
-          <p>Hola <strong>${company.legal_name}</strong>,</p>
-          <p>Tu suscripción al plan <strong>${plan.name}</strong> ha expirado el <strong>${subscription.end_date.toLocaleDateString()}</strong>.</p>
-          <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
-            <h3>⚠️ Acceso Limitado</h3>
-            <p>Algunas funcionalidades pueden estar limitadas hasta que renueves tu suscripción.</p>
-          </div>
-          <p>Para renovar y continuar disfrutando de todos nuestros servicios, contacta con nuestro equipo.</p>
-          <p>Saludos,<br>Equipo HR System</p>
+    const subject = `🚫 Tu suscripción ${plan.name} ha expirado`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #e74c3c;">🚫 Suscripción Expirada</h2>
+        <p>Hola <strong>${company.legal_name}</strong>,</p>
+        <p>Tu suscripción al plan <strong>${plan.name}</strong> ha expirado el <strong>${subscription.end_date.toLocaleDateString()}</strong>.</p>
+        <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+          <h3>⚠️ Acceso Limitado</h3>
+          <p>Algunas funcionalidades pueden estar limitadas hasta que renueves tu suscripción.</p>
         </div>
-      `
-    };
+        <p>Para renovar y continuar disfrutando de todos nuestros servicios, contacta con nuestro equipo.</p>
+        <p>Saludos,<br>Equipo HR System</p>
+      </div>
+    `;
 
     try {
-      await this.transporter.sendMail(mailOptions);
+      await this.sendEmail(company.email, subject, html);
       this.logger.log(
         `📧 Notificación de expiración enviada a ${company.email}`
       );
@@ -369,31 +376,27 @@ export class NotificationsService {
     );
 
     // Enviar email
-    const mailOptions = {
-      from: process.env.SMTP_USER,
-      to: company.email,
-      subject: `🎉 ¡Feliz cumpleaños ${employee.first_name}!`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #e91e63;">🎉 ¡Feliz Cumpleaños!</h2>
-          <p>Hola <strong>${company.legal_name}</strong>,</p>
-          <p>¡Hoy es el cumpleaños de <strong>${employee.first_name} ${employee.last_name}</strong>! 🎂</p>
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3>🎁 Detalles del empleado:</h3>
-            <ul>
-              <li><strong>Nombre:</strong> ${employee.first_name} ${employee.last_name}</li>
-              <li><strong>Email:</strong> ${employee.email}</li>
-              <li><strong>Fecha de nacimiento:</strong> ${employee.birthdate.toLocaleDateString()}</li>
-            </ul>
-          </div>
-          <p>¡No olvides felicitarlo y hacer que se sienta especial en su día! 🎈</p>
-          <p>Saludos,<br>Equipo HR System</p>
+    const subject = `🎉 ¡Feliz cumpleaños ${employee.first_name}!`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #e91e63;">🎉 ¡Feliz Cumpleaños!</h2>
+        <p>Hola <strong>${company.legal_name}</strong>,</p>
+        <p>¡Hoy es el cumpleaños de <strong>${employee.first_name} ${employee.last_name}</strong>! 🎂</p>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3>🎁 Detalles del empleado:</h3>
+          <ul>
+            <li><strong>Nombre:</strong> ${employee.first_name} ${employee.last_name}</li>
+            <li><strong>Email:</strong> ${employee.email}</li>
+            <li><strong>Fecha de nacimiento:</strong> ${employee.birthdate.toLocaleDateString()}</li>
+          </ul>
         </div>
-      `
-    };
+        <p>¡No olvides felicitarlo y hacer que se sienta especial en su día! 🎈</p>
+        <p>Saludos,<br>Equipo HR System</p>
+      </div>
+    `;
 
     try {
-      await this.transporter.sendMail(mailOptions);
+      await this.sendEmail(company.email, subject, html);
       this.logger.log(
         `🎂 Notificación de cumpleaños enviada para ${employee.first_name} ${employee.last_name}`
       );
@@ -425,31 +428,27 @@ export class NotificationsService {
         );
 
         // Enviar email
-        const mailOptions = {
-          from: process.env.SMTP_USER,
-          to: company.email,
-          subject: `🎊 Recordatorio de feriado: ${isHoliday.name}`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #f39c12;">🎊 Recordatorio de Feriado</h2>
-              <p>Hola <strong>${company.legal_name}</strong>,</p>
-              <p>Te recordamos que <strong>mañana es feriado</strong>: <strong>${isHoliday.name}</strong></p>
-              <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
-                <h3>📅 Información del feriado:</h3>
-                <ul>
-                  <li><strong>Fecha:</strong> ${date.toLocaleDateString()}</li>
-                  <li><strong>Feriado:</strong> ${isHoliday.name}</li>
-                  <li><strong>País:</strong> ${countryCode}</li>
-                </ul>
-              </div>
-              <p>¡Que tengas un excelente día libre! 🎉</p>
-              <p>Saludos,<br>Equipo HR System</p>
+        const subject = `🎊 Recordatorio de feriado: ${isHoliday.name}`;
+        const html = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #f39c12;">🎊 Recordatorio de Feriado</h2>
+            <p>Hola <strong>${company.legal_name}</strong>,</p>
+            <p>Te recordamos que <strong>mañana es feriado</strong>: <strong>${isHoliday.name}</strong></p>
+            <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+              <h3>📅 Información del feriado:</h3>
+              <ul>
+                <li><strong>Fecha:</strong> ${date.toLocaleDateString()}</li>
+                <li><strong>Feriado:</strong> ${isHoliday.name}</li>
+                <li><strong>País:</strong> ${countryCode}</li>
+              </ul>
             </div>
-          `
-        };
+            <p>¡Que tengas un excelente día libre! 🎉</p>
+            <p>Saludos,<br>Equipo HR System</p>
+          </div>
+        `;
 
         try {
-          await this.transporter.sendMail(mailOptions);
+          await this.sendEmail(company.email, subject, html);
           this.logger.log(
             `🎊 Notificación de feriado enviada a ${company.email}`
           );
