@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateDepartamentoDto } from './dto/create-departamento.dto';
 import { UpdateDepartamentoDto } from './dto/update-departamento.dto';
 import { Departamento } from './entities/departamento.entity';
+import { departments_data } from './data/department.data';
 
 @Injectable()
 export class DepartamentoService {
@@ -25,6 +26,13 @@ export class DepartamentoService {
     return await this.departamentoRepository.find({
       order: { createdAt: 'DESC' }
     });
+  }
+
+  async seeder() {
+    //Leer data y guardarla en la DB
+    await this.departamentoRepository.upsert(departments_data, ['nombre']);
+
+    return { message: 'Departments seeded successfully.' };
   }
 
   async findOne(id: string): Promise<Departamento> {

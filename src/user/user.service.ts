@@ -72,7 +72,7 @@ export class UserService {
       newUser.company = company;
     }
     if (employee) {
-      newUser.employee = employee;
+      newUser.employees = [employee];
     }
     newUser.first_name = createUserDto.first_name;
     newUser.last_name = createUserDto.last_name;
@@ -100,6 +100,13 @@ export class UserService {
     }
 
     return user as User;
+  }
+
+  async findByClerkId(clerkId: string) {
+    return this.userRepository.findOne({
+      where: { clerkId: clerkId },
+      relations: ['company', 'role']
+    });
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
