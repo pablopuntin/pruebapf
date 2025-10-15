@@ -239,8 +239,11 @@ export class EmpleadoService {
   constructor(
     @InjectRepository(Employee)
     private readonly employeeRepository: Repository<Employee>,
+    @InjectRepository(Company)
     private readonly companiesRepository: Repository<Company>,
+    @InjectRepository(Departamento)
     private readonly departmentsRepository: Repository<Departamento>,
+    @InjectRepository(Position)
     private readonly positionsRepository: Repository<Position>,
     private readonly notificationsService: NotificationsService
   ) {}
