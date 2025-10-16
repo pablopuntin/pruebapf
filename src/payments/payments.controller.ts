@@ -52,14 +52,14 @@ async handleStripeWebhook(@Req() req: Request, @Res() res: Response) {
 
   // ✅ NUEVO ENDPOINT PARA CREAR SESIÓN DE PAGO
   @Post('create-checkout-session')
-  @ApiBody({ schema: { example: { userId: 'prod_TFBArohGxPnKUT' } } })
+  @ApiBody({ schema: { example: { userId: 'user_abc123' } } })
   async createCheckoutSession(@Body() body: any, @Res() res: Response) {
     try {
       const session = await this.stripe.checkout.sessions.create({
         mode: 'subscription',
         line_items: [
           {
-            price: 'price_abc123', // ⚠️ Reemplazá con tu ID de precio real
+            price: 'prod_TFBArohGxPnKUT', // ⚠️ Reemplazá con tu ID de precio real
             quantity: 1,
           },
         ],
