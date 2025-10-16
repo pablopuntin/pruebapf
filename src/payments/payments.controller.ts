@@ -52,7 +52,7 @@ async handleStripeWebhook(@Req() req: Request, @Res() res: Response) {
 
   // ✅ NUEVO ENDPOINT PARA CREAR SESIÓN DE PAGO
   @Post('create-checkout-session')
-  @ApiBody({ schema: { example: { userId: 'user_abc123' } } })
+  @ApiBody({ schema: { example: { userId: 'prod_TFBArohGxPnKUT' } } })
   async createCheckoutSession(@Body() body: any, @Res() res: Response) {
     try {
       const session = await this.stripe.checkout.sessions.create({
