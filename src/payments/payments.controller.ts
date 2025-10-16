@@ -63,8 +63,11 @@ async handleStripeWebhook(@Req() req: Request, @Res() res: Response) {
             quantity: 1,
           },
         ],
-        success_url: 'https://tu-frontend.vercel.app/success',
-        cancel_url: 'https://tu-frontend.vercel.app/cancel',
+        // success_url: 'https://front-git-main-hr-systems-projects.vercel.app/success',
+        // cancel_url: 'https://front-git-main-hr-systems-projects.vercel.app/cancel',
+        success_url: 'https://www.google.com',
+cancel_url: 'https://www.wikipedia.org',
+
         metadata: {
           userId: body.userId || 'test-user',
         },
