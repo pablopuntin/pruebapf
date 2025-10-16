@@ -21,7 +21,7 @@ async function bootstrap() {
   // ⚠️ Stripe necesita el cuerpo crudo para validar la firma
   app.use('/payments/stripe/webhook', bodyParser.raw({ type: '*/*' }));
     // Necesario para Stripe webhook
-  app.use('/webhook', json({ verify: (req: any, res, buf) => (req.rawBody = buf) }));
+  // app.use('/webhook', json({ verify: (req: any, res, buf) => (req.rawBody = buf) }));
   
 
   // Activar validación global
@@ -45,7 +45,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('HR', app, document);
   const port = configService.get<number>('PORT', 4000);
-  await app.listen(port);
+ await app.listen(port, '0.0.0.0');
   console.log(`🚀 App running on http://localhost:${port}`);
 }
 bootstrap();
