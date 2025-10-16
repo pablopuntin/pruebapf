@@ -34,6 +34,10 @@ async handleStripeWebhook(@Req() req: Request, @Res() res: Response) {
   sig,
   this.endpointSecret,
 );
+ // 🔹 Aquí solo hacemos log, sin tocar la base de datos
+    console.log('💥 Webhook recibido:', event.type);
+    console.log('Payload:', JSON.stringify(event.data.object));
+
   } catch (err) {
     console.error('❌ Error verificando la firma de Stripe:', err.message);
     // Este catch ahora también atrapará el error de la firma faltante
