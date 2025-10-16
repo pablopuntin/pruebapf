@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +17,8 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true
   });
+  // ⚠️ Stripe necesita el cuerpo crudo para validar la firma
+  app.use('/payments/stripe/webhook', bodyParser.raw({ type: '*/*' }));
 
   // Activar validación global
   app.useGlobalPipes(
