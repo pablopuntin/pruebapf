@@ -29,11 +29,11 @@ async handleStripeWebhook(@Req() req: Request, @Res() res: Response) {
     }
 
     // 3. Ahora que sabes que 'sig' existe, úsala. ¡El error desaparece!
-    event = this.stripe.webhooks.constructEvent(
-      req.body,
-      sig, // Usamos la variable segura
-      this.endpointSecret,
-    );
+   event = this.stripe.webhooks.constructEvent(
+  (req as any).rawBody, // 👈 usa el body crudo
+  sig,
+  this.endpointSecret,
+);
   } catch (err) {
     console.error('❌ Error verificando la firma de Stripe:', err.message);
     // Este catch ahora también atrapará el error de la firma faltante
@@ -59,7 +59,7 @@ async handleStripeWebhook(@Req() req: Request, @Res() res: Response) {
         mode: 'subscription',
         line_items: [
           {
-            price: 'prod_TFBArohGxPnKUT', // ⚠️ Reemplazá con tu ID de precio real
+            price: 'price_1SIgp0BDUKGY3Xnpe6GGYqtd', // ⚠️ Reemplazá con tu ID de precio real
             quantity: 1,
           },
         ],
